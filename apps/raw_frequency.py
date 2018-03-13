@@ -1,11 +1,12 @@
 from src import corpus
 from src.diff_prop import DiffProportions
+import sys
 
 if __name__ == '__main__':
 
     c = corpus.Corpus(
         'test',
-        '/Users/ben/Desktop/work/nlp/british/',
+        sys.argv[1],
     )
 
     # name: str, text_type: str, key_list: list, binary: bool=False

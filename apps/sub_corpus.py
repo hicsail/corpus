@@ -1,15 +1,16 @@
 from src import corpus
+import sys
 
 if __name__ == '__main__':
 
     c = corpus.Corpus(
         'test',
-        '/Users/ben/Desktop/work/nlp/british/',
+        sys.argv[1],
     )
 
     s = c.build_sub_corpus(
         'sub',
-        '/Users/ben/Desktop/sub_corpus',
+        sys.argv[2],
         ['jonathan', 'lady'],
         'Filtered Text',
         40,

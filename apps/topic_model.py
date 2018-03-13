@@ -1,10 +1,11 @@
 from src import corpus
+import sys
 
 if __name__ == '__main__':
 
     c = corpus.Corpus(
         'test',
-        '/Users/ben/Desktop/work/nlp/british/',
+        sys.argv[1],
     )
 
     t = c.lsi_model(
@@ -12,5 +13,5 @@ if __name__ == '__main__':
         [1700, 1720, 1740],
         'Filtered Text'
     ).write(
-        '/Users/ben/Desktop/test_out.txt'
+        sys.argv[2]
     )

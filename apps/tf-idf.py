@@ -1,10 +1,11 @@
 from src import corpus
+import sys
 
 if __name__ == '__main__':
 
     c = corpus.Corpus(
         'test',
-        '/Users/ben/Desktop/work/nlp/british/',
+        sys.argv[1],
     )
 
     f = c.tf_idf(
