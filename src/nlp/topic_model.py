@@ -1,6 +1,4 @@
-import json
 import tqdm
-from src.utils import *
 from src.results import *
 from gensim.models.ldamodel import LdaModel
 from gensim.models.lsimodel import LsiModel

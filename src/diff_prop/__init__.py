@@ -91,7 +91,7 @@ class DiffProportions:
 
     def take_difference(self):
         """
-        Main method that takes difference in proportions between two corpora.
+        Take difference in proportions between two corpora.
         """
 
         sample_records = {}

@@ -9,9 +9,6 @@ class Results:
     """
 
     def __init__(self, d: dict, n: dict):
-        """
-        Initialize Results object.
-        """
 
         self.d = d
         self.n = n
@@ -31,6 +28,10 @@ class FrequencyResults(Results):
         self.f_type = f_type
 
     def debug_str(self):
+        """
+        Identify results object name and frequency type.
+        """
+
         print("FrequencyResults object: \n\t - name: {0} \n\t - stores: {1}"
               .format(self.name, self.f_type)
               )
@@ -151,6 +152,10 @@ class TopResults(Results):
         self.name = name
 
     def debug_str(self):
+        """
+        Identify TopResults object and name.
+        """
+
         print("TopResults object: \n\t - name: {0}"
               .format(self.name)
               )
@@ -216,6 +221,10 @@ class TfidfResults(Results):
         self.name = name
 
     def debug_str(self):
+        """
+        Identify TfidfResults object, name, and keyword.
+        """
+
         print("TfidfResults object: \n\t - name: {0} \n\t - keyword: {1}"
               .format(self.name, self.keyword)
               )
@@ -284,6 +293,10 @@ class TopicResults(Results):
         self.name = name
 
     def debug_str(self):
+        """
+        Identfiy TopicResults object and name.
+        """
+
         print("Topic Model object: \n\t - {0}"
               .format(self.name)
               )

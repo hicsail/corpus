@@ -22,6 +22,9 @@ class GraphFrequency:
         self.plt = None
 
     def check_names(self):
+        """
+        Ensure that there are no name repeats in the corpora list.
+        """
 
         names = set()
 
@@ -36,8 +39,10 @@ class GraphFrequency:
 
         assert len(names) == len(self.corpora)
 
-    # TODO: temp fix, make general
     def check_colors(self):
+        """
+        If a list of colors is passed, ensure that it is of the same length as the corpora list.
+        """
 
         if self.colors is not None:
             assert len(self.colors) == len(self.corpora)
@@ -294,6 +299,7 @@ class GraphFrequency:
         """
         Save graph to file
         """
+
         try:
             self.plt.savefig(out_path)
         except ValueError:
