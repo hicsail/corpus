@@ -23,7 +23,7 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
-    def frequency(self, name, year_list, key_list, text_type, stop_words: [list, set, str, None]=None):
+    def frequency(self, name, year_list, key_list, text_type: str='Full Text', stop_words: [list, set, str, None]=None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -39,7 +39,7 @@ class Corpus:
 
         return f.take_freq()
 
-    def avg_frequency(self, name, year_list, key_list, text_type, stop_words: [list, set, str, None]=None):
+    def avg_frequency(self, name, year_list, key_list, text_type: str='Full Text', stop_words: [list, set, str, None]=None):
         """
         Measure average frequency of a set of keywords per document across a corpus.
         """
@@ -55,7 +55,7 @@ class Corpus:
 
         return f.take_average_freq()
 
-    def variance(self, name, year_list, key_list, text_type, stop_words: [list, set, str, None]=None):
+    def variance(self, name, year_list, key_list, text_type: str='Full Text', stop_words: [list, set, str, None]=None):
         """
         Measure variance in keyword frequency across a corpus.
         """
@@ -85,7 +85,7 @@ class Corpus:
 
         return f.top_n(num_words, n_gram)
 
-    def tf_idf(self, name, year_list, keyword, n, text_type, stop_words: [list, set, None]=None):
+    def tf_idf(self, name, year_list, keyword, n, text_type: str='Full Text', stop_words: [list, set, None]=None):
         """
         Find documents with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
@@ -100,7 +100,7 @@ class Corpus:
 
         return t.top_n(keyword, n)
 
-    def raw_frequency(self, name: str, text_type: str, key_list: list, binary: bool=False):
+    def raw_frequency(self, name: str,  key_list: list, text_type: str='Full Text', binary: bool=False):
         """
         Build raw frequency tables for a corpus. Returned object is used for
         difference in proportions testing.
@@ -116,7 +116,7 @@ class Corpus:
 
         return rf.take_frequencies()
 
-    def lda_model(self, name, year_list, text_type,  num_topics: [int, None] = 10,
+    def lda_model(self, name, year_list, text_type: str='Full Text',  num_topics: [int, None] = 10,
                   passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None]=None):
         """
         Build LDA Topic Models for each period within a corpus.
@@ -132,7 +132,7 @@ class Corpus:
 
         return t.lda_model(num_topics, passes, seed)
 
-    def lsi_model(self, name, year_list, text_type,  num_topics: [int, None] = 10,
+    def lsi_model(self, name, year_list, text_type: str='Full Text',  num_topics: [int, None] = 10,
                   stochastic=False, stop_words: [list, set, None]=None):
         """
         Build LSI Topic Models for each period within a corpus.
@@ -172,7 +172,7 @@ class Corpus:
                             'Author': author,
                             'Keyword': keyword,
                             'Year Published': year,
-                            'Text': text
+                            'Full Text': text
                             },
                            sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
         return jfile
@@ -184,6 +184,7 @@ class Corpus:
 
         text = [' '.join(w).strip() for w in text]
         words = [' '.join(w).strip() for w in words]
+
         with open(
                 "{0}/{1}_{2}-{3}.json"
                 .format(out_dir, str(year), str(index), str(sub_index)),
@@ -195,7 +196,7 @@ class Corpus:
                 )
             )
 
-    def build_sub_corpus(self, name, output_dir: str, key_list: list, text_type,
+    def build_sub_corpus(self, name, output_dir: str, key_list: list, text_type: str='Full Text',
                          doc_size: int=20, y_range: [list, None]=None):
         """
         From a larger corpus, construct a sub-corpus containing

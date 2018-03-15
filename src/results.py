@@ -1,4 +1,5 @@
 import re
+import json
 from src.utils import *
 
 
@@ -33,6 +34,46 @@ class FrequencyResults(Results):
         print("FrequencyResults object: \n\t - name: {0} \n\t - stores: {1}"
               .format(self.name, self.f_type)
               )
+
+    def clean_keys(self):
+        """
+        Iterate over frequency results dictionary & convert tuples to strings.
+        """
+
+        d = self.d
+
+        for f in d:
+            for k in d[f]:
+                if isinstance(k, tuple):
+                    d[f][' '.join(k)] = d[f].pop(k)
+
+        return d
+
+    @staticmethod
+    def _build_json(d):
+        """
+        Transform results dictionary to JSON object.
+        """
+
+        jfile = json.dumps(d, sort_keys=False, indent=4, separators=(',', ': '), ensure_ascii=False)
+        return jfile
+
+    def write_to_json(self, out_path: str):
+        """
+        Write results to JSON file to use for later analysis.
+        """
+
+        d = self.clean_keys()
+
+        jf = dict()
+        jf['Years'] = self.years
+        jf['Frequency Type'] = self.f_type
+        jf['Name'] = self.name
+        jf['n'] = self.n
+        jf['d'] = d
+
+        with open(out_path + '.json', 'w', encoding='utf-8') as j:
+            j.write(self._build_json(jf))
 
     def write(self, out_path: str):
         """

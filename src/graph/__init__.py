@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 
 class GraphFrequency:
@@ -25,7 +26,13 @@ class GraphFrequency:
         names = set()
 
         for corpus in self.corpora:
-            names.add(corpus.name)
+
+            if isinstance(corpus, str):
+                with open(corpus, 'r', encoding='utf8') as in_file:
+                    jsondata = json.load(in_file)
+                    names.add(jsondata['Name'])
+            else:
+                names.add(corpus.name)
 
         assert len(names) == len(self.corpora)
 
@@ -43,7 +50,13 @@ class GraphFrequency:
         f_types = set()
 
         for corpus in self.corpora:
-            f_types.add(corpus.f_type)
+
+            if isinstance(corpus, str):
+                with open(corpus, 'r', encoding='utf8') as in_file:
+                    jsondata = json.load(in_file)
+                    f_types.add(jsondata['Frequency Type'])
+            else:
+                f_types.add(corpus.f_type)
 
         if len(f_types) != 1:
             print("Warning: mismatched frequency types across corpora.\n")
@@ -58,7 +71,13 @@ class GraphFrequency:
         year_lists = set()
 
         for corpus in self.corpora:
-            year_lists.add(tuple(corpus.years))
+
+            if isinstance(corpus, str):
+                with open(corpus, 'r', encoding='utf8') as in_file:
+                    jsondata = json.load(in_file)
+                    year_lists.add(tuple(jsondata['Years']))
+            else:
+                year_lists.add(tuple(corpus.years))
 
         if len(year_lists) != 1:
             print("Warning: malformed year list inputs.\n")
@@ -79,6 +98,18 @@ class GraphFrequency:
 
         return a
 
+    def _build_graph_list_from_json(self, k, d):
+        """
+        Build a list of values to be graphed for a given keyword from a JSON file.
+        """
+
+        a = [0] * len(self.year_list)
+
+        for i in range(len(self.year_list)):
+            a[i] = d[str(self.year_list[i])][k]
+
+        return a
+
     def build_graph_dict(self):
         """
         Traverse each corpus' frequency dictionaries and populate
@@ -87,23 +118,48 @@ class GraphFrequency:
 
         for corpus in self.corpora:
 
-            c_res = corpus.d
-            c_keys = [k[0] for k in c_res[self.year_list[0]].items()]
+            if isinstance(corpus, str):
+                with open(corpus, 'r', encoding='utf8') as in_file:
+                    jsondata = json.load(in_file)
 
-            self.graph_dict[corpus.name] = {}
+                    c_res = jsondata['d']
+                    c_keys = [k[0] for k in c_res[str(self.year_list[0])].items()]
 
-            for k in c_keys:
-                self.graph_dict[corpus.name][k] = self._build_graph_list(k, c_res)
+                    name = jsondata['Name']
+                    self.graph_dict[name] = {}
+
+                    for k in c_keys:
+                        self.graph_dict[name][k] = self._build_graph_list_from_json(k, c_res)
+            else:
+                c_res = corpus.d
+                c_keys = [k[0] for k in c_res[self.year_list[0]].items()]
+
+                self.graph_dict[corpus.name] = {}
+
+                for k in c_keys:
+                    self.graph_dict[corpus.name][k] = self._build_graph_list(k, c_res)
 
         return self
 
     def build_num_docs(self):
+        """
+        Build dictionary that records number of documents per period.
+        """
 
         num_docs = {}
 
         for corpus in self.corpora:
-            values = list(corpus.n.values())
-            num_docs[corpus.name] = values
+
+            if isinstance(corpus, str):
+                with open(corpus, 'r', encoding='utf8') as in_file:
+                    jsondata = json.load(in_file)
+                    values = jsondata['n'].values()
+
+                    name = jsondata['Name']
+                    num_docs[name] = values
+            else:
+                values = list(corpus.n.values())
+                num_docs[corpus.name] = values
 
         self.num_docs = num_docs
 
@@ -195,7 +251,7 @@ class GraphFrequency:
                             )
                             colors_idx += 1
 
-                        num_docs_record = self.num_docs[f]
+                        num_docs_record = list(self.num_docs[f])
 
                         for j in range(len(rects)):
                             h = rects[j].get_height()
