@@ -5,7 +5,7 @@ if __name__ == '__main__':
 
     c = corpus.Corpus(
         'test',
-        sys.argv[1],
+        sys.argv[1]
     )
 
     e1 = c.frequency(
@@ -15,6 +15,8 @@ if __name__ == '__main__':
         'Filtered Text'
     )
 
+    e1.write_to_json('/Users/ben/Desktop/out')
+
     e2 = c.frequency(
         'f2',
         [1800, 1820, 1840],
@@ -22,4 +24,5 @@ if __name__ == '__main__':
         'Filtered Text'
     )
 
-    g = graph.GraphFrequency([e1, e2], colors=['black', 'grey']).create_plot().show()
+    g = graph.GraphFrequency(['/Users/ben/Desktop/out.json', e2], colors=['black', 'grey']).create_plot().show()
+
