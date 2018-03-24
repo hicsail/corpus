@@ -87,6 +87,7 @@ class DiffProportions:
         (z, p_value) = statsmodels.api.stats.proportions_ztest(
             [k1, k2], [n1, n2], alternative='two-sided', prop_var=False
         )
+
         return [z, p_value]
 
     def take_difference(self):

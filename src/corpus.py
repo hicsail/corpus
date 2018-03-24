@@ -175,6 +175,7 @@ class Corpus:
                             'Full Text': text
                             },
                            sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
+
         return jfile
 
     def _write_extract(self, out_dir, words, year, index, sub_index, title, author, text):
@@ -204,7 +205,6 @@ class Corpus:
         amount of words around the occurrence.
         """
 
-        # create / overwrite directory where results will be stored
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         else:
