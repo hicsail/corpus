@@ -1,7 +1,7 @@
 import json, re, os, shutil
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
-from parsing.parsed import Parsed
+from parsing.parsed import Parsed, RedditComment
 
 
 def fail(msg: str):
@@ -62,6 +62,15 @@ def build_json(file: Parsed):
     return jfile
 
 
+def build_reddit_json(file: RedditComment):
+
+    jfile = json.dumps({'Author': file.author, 'Date': file.date, 'Sub ID': file.sub_id, 'Score': file.score,
+                        'Upvotes': file.upvotes, 'Controversy': file.controversy, 'Text': file.text,
+                        'Filtered': file.filtered, 'Stemmed': file.stemmed, 'Filtered Stemmed': file.f_stemmed,
+                        'ID': file.id}, indent=4, separators=(',', ': '), ensure_ascii=False)
+    return jfile
+
+
 def filter_chapters(chapters: str):
     """
     Delete 'None' and empty chapter entries.
@@ -113,6 +122,26 @@ def add_content(text: str, file: Parsed, language: str):
 
     # stem the filtered text
     filtered_stemmed = stem_text(filtered, language)
+    file.add_filtered_stemmed(filtered_stemmed)
+
+
+def add_reddit_content(text: str, file: RedditComment):
+
+    text_list = clean_text(text)
+
+    # full text
+    file.add_content(text_list)
+
+    # stem the full text
+    stemmed = stem_text(text_list, "english")
+    file.add_stemmed(stemmed)
+
+    # filter the unstemmed full text
+    filtered = filter_text(text_list, "english")
+    file.add_filtered(filtered)
+
+    # stem the filtered text
+    filtered_stemmed = stem_text(filtered, "english")
     file.add_filtered_stemmed(filtered_stemmed)
 
 

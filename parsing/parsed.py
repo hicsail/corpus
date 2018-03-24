@@ -52,3 +52,42 @@ class Parsed:
         self.ch += chapter + ", "
 
 
+class RedditComment:
+    """
+    Volume object for a Reddit corpus. Stores text along with subreddit ID, author, and MM-YYYY of comment.
+    """
+    def __init__(
+            self,
+            sub_id='',
+            author='',
+            date='',
+            score=0,
+            upvotes=0,
+            controversy=0,
+            id=''):
+
+        self.sub_id = sub_id
+        self.author = author
+        self.date = date
+        self.score = score
+        self.upvotes = upvotes
+        self.controversy = controversy
+        self.id = id
+
+        self.text = []
+        self.filtered = []
+        self.stemmed = []
+        self.f_stemmed = []
+
+    def add_content(self, text):
+        self.text.extend(text)
+
+    def add_filtered(self, text):
+        self.filtered.extend(text)
+
+    def add_stemmed(self, text):
+        self.stemmed.extend(text)
+
+    def add_filtered_stemmed(self, text):
+        self.f_stemmed.extend(text)
+
