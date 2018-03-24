@@ -57,6 +57,7 @@ class FrequencyResults(Results):
         """
 
         jfile = json.dumps(d, sort_keys=False, indent=4, separators=(',', ': '), ensure_ascii=False)
+
         return jfile
 
     def write_to_json(self, out_path: str):
@@ -314,6 +315,7 @@ class TopicResults(Results):
                 del filtered[k]
             else:
                 filtered[k] = filtered[k].lower()
+
         return ", ".join(filtered)
 
     @staticmethod
