@@ -1,7 +1,8 @@
-import json, tqdm
-from src.utils import *
-from src.results import *
+import tqdm
+
 from gensim.models import TfidfModel
+
+from src.results import *
 
 
 class Tfidf:
@@ -49,7 +50,7 @@ class Tfidf:
                     with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
                         json_data = json.load(in_file)
-                        year = int(json_data["Year Published"])
+                        year = int(json_data["Date"])
 
                         if self.year_list[0] <= year < self.year_list[-1]:
                             text = json_data[self.text_type]
@@ -126,7 +127,7 @@ class Tfidf:
                     with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
                         json_data = json.load(in_file)
-                        year = int(json_data["Year Published"])
+                        year = int(json_data["Date"])
 
                         if self.year_list[0] <= year < self.year_list[-1]:
                             text = json_data[self.text_type]

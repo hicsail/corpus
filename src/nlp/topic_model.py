@@ -1,9 +1,11 @@
 import tqdm
-from src.results import *
+
 from gensim.models.ldamodel import LdaModel
 from gensim.models.lsimodel import LsiModel
 from numpy.random import RandomState
 from gensim.models import TfidfModel
+
+from src.results import *
 
 
 class TopicModel:
@@ -53,7 +55,7 @@ class TopicModel:
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
 
                         jsondata = json.load(in_file)
-                        year = int(jsondata["Year Published"])
+                        year = int(jsondata["Date"])
 
                         if self.year_list[0] <= year < self.year_list[-1]:
                             text = jsondata[self.text_type]

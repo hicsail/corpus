@@ -1,4 +1,6 @@
-import json, tqdm, nltk
+import tqdm
+import nltk
+
 from src.results import *
 
 
@@ -47,7 +49,7 @@ class RawFrequency:
             jsondata = json.load(in_file)
 
             self.freq_dict[jsondoc] = {}
-            self.freq_dict[jsondoc]['Year Published'] = int(jsondata['Year Published'])
+            self.freq_dict[jsondoc]['Date'] = int(jsondata['Date'])
             self.freq_dict[jsondoc]['Frequencies'] = {}
 
             if self.binary:

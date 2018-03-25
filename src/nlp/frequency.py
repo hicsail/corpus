@@ -1,4 +1,7 @@
-import json, tqdm, nltk, math
+import tqdm
+import nltk
+import math
+
 from src.results import *
 
 
@@ -87,7 +90,7 @@ class Frequency:
                     with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
                         json_data = json.load(in_file)
-                        year = int(json_data["Year Published"])
+                        year = int(json_data["Date"])
 
                         if self.year_list[0] <= year < self.year_list[-1]:
 
@@ -280,7 +283,7 @@ class Frequency:
     def top_n(self, num: int, n: int=1):
         """
         Construct a dictionary that stores the top
-        < num > words per period across a corpus.
+        <num> words per period across a corpus.
         """
 
         fdists = num_dict(self.year_list)
@@ -297,7 +300,7 @@ class Frequency:
                     with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
                         json_data = json.load(in_file)
-                        year = int(json_data["Year Published"])
+                        year = int(json_data["Date"])
 
                         if self.year_list[0] <= year < self.year_list[-1]:
 

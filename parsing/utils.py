@@ -1,4 +1,8 @@
-import json, re, os, shutil
+import json
+import re
+import os
+import shutil
+
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 from parsing.parsed import Parsed, RedditComment
@@ -13,6 +17,7 @@ def fail(msg: str):
     os._exit(1)
 
 
+# TODO: ask user if they want to overwrite directory, if it exists
 def build_out(out_dir: str):
     """
     Build output directory, overwrite if exists.
@@ -52,10 +57,10 @@ def build_json(file: Parsed):
     file.d = file.d.replace("\n", " ")
     file.ch = filter_chapters(file.ch)
 
-    jfile = json.dumps({'Title': file.t, 'Author': file.a, 'Publisher': file.p, 'Year Published': file.y,
+    jfile = json.dumps({'Title': file.t, 'Author': file.a, 'Publisher': file.p, 'Date': file.y,
                         'ISBN': file.i, 'Document Type': file.d, 'List of chapters': file.ch, 'HTID': file.h,
-                        'Full Text': file.c, 'Full Text Stemmed': file.cstem, 'Filtered Text': file.tx,
-                        'Filtered Text Stemmed': file.txstem, 'Full Sentences': file.c_sent,
+                        'Text': file.c, 'Stemmed': file.cstem, 'Filtered': file.tx,
+                        'Filtered Stemmed': file.txstem, 'Full Sentences': file.c_sent,
                         'Filtered Sentences': file.tx_sent, 'Stemmed Sentences': file.cstem_sent,
                         'Filtered Stemmed Sentences': file.txstem_sent, 'URL': file.url},
                        sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)

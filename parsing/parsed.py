@@ -1,8 +1,7 @@
 
-
 class Parsed:
     """
-    Main volume object for corpora. Stores text along with title, publication date, and author.
+    Main volume object for lit_corpora. Stores text along with title, publication date, and author.
     """
     def __init__(self, title='', author='', pub_info='', years="2000 ",
                  isbn='', doc_type='', chapters='', htid='', url=''):

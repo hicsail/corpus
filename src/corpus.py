@@ -1,5 +1,9 @@
-import tqdm, json, shutil, sys
+import tqdm
+import json
+import shutil
+import sys
 import nltk
+
 from src.nlp import frequency, tf_idf, topic_model, raw_frequency
 from src.utils import *
 
@@ -230,7 +234,7 @@ class Corpus:
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
                         index += 1
                         jsondata = json.load(in_file)
-                        year = int(jsondata["Year Published"])
+                        year = int(jsondata["Date"])
                         if y_min <= year <= y_max:
                             title = jsondata["Title"]
                             author = jsondata["Author"]

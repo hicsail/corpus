@@ -1,5 +1,6 @@
 import statsmodels.api
 import scipy.stats
+
 from src.utils import *
 from src.results import DiffPropResults
 
@@ -53,7 +54,7 @@ class DiffProportions:
 
         for doc in freq.keys():
 
-            year = freq[doc]['Year Published']
+            year = freq[doc]['Date']
 
             if self.year_list[0] < year < self.year_list[-1]:
                 target = determine_year(year, self.year_list)
