@@ -1,4 +1,5 @@
 
+
 class Parsed:
     """
     Main volume object for lit_corpora. Stores text along with title, publication date, and author.
@@ -63,7 +64,7 @@ class RedditComment:
             score=0,
             upvotes=0,
             controversy=0,
-            id=''):
+            comment_id=''):
 
         self.sub_id = sub_id
         self.author = author
@@ -71,7 +72,7 @@ class RedditComment:
         self.score = score
         self.upvotes = upvotes
         self.controversy = controversy
-        self.id = id
+        self.comment_id = comment_id
 
         self.text = []
         self.filtered = []
