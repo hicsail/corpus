@@ -10,6 +10,8 @@ use across a large corpus of British and Danish literature.
 
 ### Data Format
 
+TODO: OUTDATED
+
 The functions in this library assume a particular schema for input data. In particular, a _corpus_ is expected
 to be of the form:
 
