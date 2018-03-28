@@ -66,6 +66,39 @@ class Frequency:
 
         return lengths.pop()
 
+    def _update_frequency_lists(self, frequency_lists, json_data, n):
+        """
+        Update frequency lists with text from a volume.
+        """
+
+        year = int(json_data["Date"])
+
+        if self.year_list[0] <= year < self.year_list[-1]:
+
+            text = list(nltk.ngrams(json_data[self.text_type], n))
+
+            for i in range(len(text) - 1, -1, -1):
+
+                # Delete empty strings and single characters
+                if text[i] in self.stop_words:
+                    del text[i]
+
+            target = determine_year(year, self.year_list)
+
+            total_words = len(list(text))
+            all_keys = 0
+
+            fdist = nltk.FreqDist(text)
+
+            for k in self.keys:
+
+                all_keys += fdist[k]
+                frequency_lists[target][k].append((fdist[k], total_words))
+
+            frequency_lists[target]['TOTAL'].append((all_keys, total_words))
+
+        return self
+
     def set_frequency_record(self):
         """
         Construct a dictionary that stores the
@@ -89,32 +122,16 @@ class Frequency:
 
                     with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
-                        json_data = json.load(in_file)
-                        year = int(json_data["Date"])
+                        try:
 
-                        if self.year_list[0] <= year < self.year_list[-1]:
+                            json_data = json.load(in_file)
 
-                            text = list(nltk.ngrams(json_data[self.text_type], n))
+                            for k in list(json_data.keys()):
+                                self._update_frequency_lists(frequency_lists, json_data[k], n)
 
-                            for i in range(len(text) - 1, -1, -1):
+                        except json.decoder.JSONDecodeError:
 
-                                # Delete empty strings and single characters
-                                if text[i] in self.stop_words:
-                                    del text[i]
-
-                            target = determine_year(year, self.year_list)
-
-                            total_words = len(list(text))
-                            all_keys = 0
-
-                            fdist = nltk.FreqDist(text)
-
-                            for k in self.keys:
-
-                                all_keys += fdist[k]
-                                frequency_lists[target][k].append((fdist[k], total_words))
-
-                            frequency_lists[target]['TOTAL'].append((all_keys, total_words))
+                            print("Error loading file {}".format(json_doc))
 
         self.frequency_record = frequency_lists
         self.calculate_num_docs()
@@ -280,6 +297,28 @@ class Frequency:
 
         return keys
 
+    def _update_top(self, json_data, num_docs, num_words, fdists, n):
+        """
+        Update dictionaries storing top words with contents of a volume.
+        """
+
+        year = int(json_data["Date"])
+
+        if self.year_list[0] <= year < self.year_list[-1]:
+
+            text = list(nltk.ngrams(json_data[self.text_type], n))
+            target = determine_year(year, self.year_list)
+            num_docs[target] += 1
+
+            total_words = len(list(text))
+            num_words[target] += total_words
+            fdist = nltk.FreqDist(text)
+
+            if fdists[target] == 0:
+                fdists[target] = fdist
+            else:
+                fdists[target] |= fdist
+
     def top_n(self, num: int, n: int=1):
         """
         Construct a dictionary that stores the top
@@ -299,23 +338,17 @@ class Frequency:
 
                     with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
-                        json_data = json.load(in_file)
-                        year = int(json_data["Date"])
+                        try:
 
-                        if self.year_list[0] <= year < self.year_list[-1]:
+                            json_data = json.load(in_file)
 
-                            text = list(nltk.ngrams(json_data[self.text_type], n))
-                            target = determine_year(year, self.year_list)
-                            num_docs[target] += 1
+                            for k in list(json_data.keys()):
 
-                            total_words = len(list(text))
-                            num_words[target] += total_words
-                            fdist = nltk.FreqDist(text)
+                                self._update_top(json_data[k], num_docs, num_words, fdists, n)
 
-                            if fdists[target] == 0:
-                                fdists[target] = fdist
-                            else:
-                                fdists[target] |= fdist
+                        except json.decoder.JSONDecodeError:
+
+                            print("Error loading file {}".format(json_doc))
 
         for year in self.year_list[:-1]:
 

@@ -17,10 +17,10 @@ def fail(msg: str):
     os._exit(1)
 
 
-# TODO: ask user if they want to overwrite directory, if it exists
+# TODO: ask user if they want to overwrite directory or add to it, if it exists
 def build_out(out_dir: str):
     """
-    Build output directory, overwrite if exists.
+    Build output directory, overwrite if it exists.
     """
 
     if out_dir is not None:
@@ -69,11 +69,22 @@ def build_json(file: Parsed):
 
 def build_reddit_json(file: RedditComment):
 
-    jfile = json.dumps({'Author': file.author, 'Date': file.date, 'Sub ID': file.sub_id, 'Score': file.score,
-                        'Upvotes': file.upvotes, 'Controversy': file.controversy, 'Text': file.text,
-                        'Filtered': file.filtered, 'Stemmed': file.stemmed, 'Filtered Stemmed': file.f_stemmed,
-                        'ID': file.id}, indent=4, separators=(',', ': '), ensure_ascii=False)
-    return jfile
+    entry = \
+        {
+            'Author': file.author,
+            'Date': file.date,
+            'Sub ID': file.sub_id,
+            'Score': file.score,
+            'Upvotes': file.upvotes,
+            'Controversy': file.controversy,
+            'Text': file.text,
+            'Filtered': file.filtered,
+            'Stemmed': file.stemmed,
+            'Filtered Stemmed': file.f_stemmed,
+            'ID': file.comment_id
+        }
+
+    return entry
 
 
 def filter_chapters(chapters: str):
@@ -131,6 +142,9 @@ def add_content(text: str, file: Parsed, language: str):
 
 
 def add_reddit_content(text: str, file: RedditComment):
+    """
+    Add content to Reddit volume.
+    """
 
     text_list = clean_text(text)
 
