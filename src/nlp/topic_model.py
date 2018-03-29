@@ -32,6 +32,29 @@ class TopicModel:
         self.corpora = None
         self.num_docs = None
 
+    def _update_dictionaries_and_corpora(self, k, jsondata, word_to_id_results, corpora_results, numdocs):
+        """
+        Update dictionaries and corpora with results from a single volume.
+        """
+
+        year = int(jsondata[k]["Date"])
+
+        if self.year_list[0] <= year < self.year_list[-1]:
+            text = jsondata[k][self.text_type]
+
+            for i in range(len(text) - 1, -1, -1):
+
+                if text[i] in self.stop_words or len(text[i]) < 2:
+                    del text[i]
+
+            target = determine_year(year, self.year_list)
+            numdocs[target] += 1
+
+            if len(text) > 0:
+                word_to_id_results[target].add_documents([text])
+                d2b = word_to_id_results[target].doc2bow(text)
+                corpora_results[target].append(d2b)
+
     def build_dictionaries_and_corpora(self):
         """
         Construct word_to_id that store the word -> id mappings and the bag of words
@@ -54,25 +77,19 @@ class TopicModel:
 
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
 
-                        jsondata = json.load(in_file)
-                        year = int(jsondata["Date"])
+                        try:
 
-                        if self.year_list[0] <= year < self.year_list[-1]:
-                            text = jsondata[self.text_type]
+                            jsondata = json.load(in_file)
 
-                            for i in range(len(text) - 1, -1, -1):
+                            for k in jsondata.keys():
 
-                                # Delete empty strings and single characters
-                                if text[i] in self.stop_words or len(text[i]) < 2:
-                                    del text[i]
+                                self._update_dictionaries_and_corpora(
+                                    k, jsondata, word_to_id_results, corpora_results, numdocs
+                                )
 
-                            target = determine_year(year, self.year_list)
-                            numdocs[target] += 1
+                        except json.decoder.JSONDecodeError:
 
-                            if len(text) > 0:
-                                word_to_id_results[target].add_documents([text])
-                                d2b = word_to_id_results[target].doc2bow(text)
-                                corpora_results[target].append(d2b)
+                            print("Error loading file {}".format(jsondoc))
 
         self.word_to_id = word_to_id_results
         self.corpora = corpora_results

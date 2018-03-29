@@ -28,6 +28,25 @@ class Tfidf:
         self.word_to_id = None
         self.corpora = None
 
+    def _update_dictionaries_and_corpora(self, k, json_data, word_to_id_results, corpora_results):
+
+        year = int(json_data[k]["Date"])
+
+        if self.year_list[0] <= year < self.year_list[-1]:
+            text = json_data[k][self.text_type]
+
+            for i in range(len(text) - 1, -1, -1):
+
+                if text[i] in self.stop_words:
+                    del text[i]
+
+            target = determine_year(year, self.year_list)
+
+            if len(text) > 0:
+                word_to_id_results[target].add_documents([text])
+                d2b = word_to_id_results[target].doc2bow(text)
+                corpora_results[target].append(d2b)
+
     def build_dictionaries_and_corpora(self):
         """
         Construct word_to_id that store the word -> id mappings and the bag of words
@@ -44,29 +63,22 @@ class Tfidf:
         print("Building word to ID mappings.")
 
         for subdir, dirs, files in os.walk(self.in_dir):
-            for json_doc in tqdm.tqdm(files):
-                if json_doc[0] != ".":
+            for jsondoc in tqdm.tqdm(files):
+                if jsondoc[0] != ".":
 
-                    with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+                    with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
 
-                        json_data = json.load(in_file)
-                        year = int(json_data["Date"])
+                        try:
 
-                        if self.year_list[0] <= year < self.year_list[-1]:
-                            text = json_data[self.text_type]
+                            json_data = json.load(in_file)
 
-                            for i in range(len(text) - 1, -1, -1):
+                            for k in json_data.keys():
 
-                                # Delete empty strings and single characters
-                                if text[i] in self.stop_words:
-                                    del text[i]
+                                self._update_dictionaries_and_corpora(k, json_data, word_to_id_results, corpora_results)
 
-                            target = determine_year(year, self.year_list)
+                        except json.decoder.JSONDecodeError:
 
-                            if len(text) > 0:
-                                word_to_id_results[target].add_documents([text])
-                                d2b = word_to_id_results[target].doc2bow(text)
-                                corpora_results[target].append(d2b)
+                            print("Error loading file {}".format(jsondoc))
 
         self.word_to_id = word_to_id_results
         self.corpora = corpora_results
@@ -90,6 +102,30 @@ class Tfidf:
         self.tf_idf_models = results
 
         return self
+
+    def _update_top_n(self, k, json_data, results, num_docs, keyword, jsondoc):
+        """
+        Update dictionary that stores the top <n> documents w/r/t a given
+        keyword within a corpus.
+        """
+
+        year = int(json_data[k]["Date"])
+
+        if self.year_list[0] <= year < self.year_list[-1]:
+
+            text = json_data[k][self.text_type]
+
+            if keyword in set(text):
+
+                target = determine_year(year, self.year_list)
+                num_docs[target] += 1
+                d2b = self.word_to_id[target].doc2bow(text)
+                tfidf_doc = self.tf_idf_models[target][d2b]
+
+                for t in tfidf_doc:
+
+                    if self.word_to_id[target].get(t[0]) == keyword:
+                        results[target].append((jsondoc, t[1]))
 
     def _top_n(self, results, n):
         """
@@ -121,28 +157,21 @@ class Tfidf:
         print("Calculating {0} files with top TF-IDF scores for \'{1}\'".format(n, keyword))
 
         for subdir, dirs, files in os.walk(self.in_dir):
-            for json_doc in tqdm.tqdm(files):
-                if json_doc[0] != ".":
+            for jsondoc in tqdm.tqdm(files):
+                if jsondoc[0] != ".":
 
-                    with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+                    with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
 
-                        json_data = json.load(in_file)
-                        year = int(json_data["Date"])
+                        try:
 
-                        if self.year_list[0] <= year < self.year_list[-1]:
-                            text = json_data[self.text_type]
+                            json_data = json.load(in_file)
+                            for k in json_data.keys():
 
-                            # skip this document if it doesn't contain the keyword
-                            if keyword in set(text):
+                                self._update_top_n(k, json_data, results, num_docs, keyword, jsondoc)
 
-                                target = determine_year(year, self.year_list)
-                                num_docs[target] += 1
-                                d2b = self.word_to_id[target].doc2bow(text)
-                                tfidf_doc = self.tf_idf_models[target][d2b]
+                        except json.decoder.JSONDecodeError:
 
-                                for t in tfidf_doc:
-                                    if self.word_to_id[target].get(t[0]) == keyword:
-                                        results[target].append((json_doc, t[1]))
+                            print("Error loading file {}".format(jsondoc))
 
         top_results = self._top_n(results, n)
 

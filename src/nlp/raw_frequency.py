@@ -8,7 +8,7 @@ class RawFrequency:
     """
     Iterates over a corpus and tracks either binary occurrence of a set of keywords
     or their frequency. Binary occurrence is particularly useful for small volumes
-    (i.e. - snippet files outputted by build_sub_corpus() in corpus.py.
+    (i.e. - snippet files outputted by build_sub_corpus() in corpus.py).
     """
 
     def __init__(self, name: str, in_dir: str, text_type: str,
@@ -38,37 +38,56 @@ class RawFrequency:
 
         return lengths.pop()
 
+    def _update_freq_dict(self, cur_key, json_data, n):
+        """
+        Take frequencies from a single volume within a file.
+        """
+
+        self.freq_dict[cur_key] = {}
+        self.freq_dict[cur_key]['Date'] = int(json_data['Date'])
+        self.freq_dict[cur_key]['Frequencies'] = {}
+
+        if self.binary:
+            text = set(nltk.ngrams(json_data[self.text_type], n))
+
+            for keyword in self.keys:
+                if keyword in text:
+                    self.freq_dict[cur_key]['Frequencies'][' '.join(keyword)] = 1
+                else:
+                    self.freq_dict[cur_key]['Frequencies'][' '.join(keyword)] = 0
+
+        else:
+            text = list(nltk.ngrams(json_data[self.text_type], n))
+            self.freq_dict[cur_key]['Text Length'] = len(text)
+
+            fdist = nltk.FreqDist(text)
+
+            for keyword in self.keys:
+                self.freq_dict[cur_key]['Frequencies'][' '.join(keyword)] = fdist[keyword]
+
+        return self
+
     def _take_frequencies(self, jsondoc):
         """
-        Helper method, measures frequencies in a single volume.
+        Take frequencies from a collection of volumes within a file.
         """
 
         n = self.detect_n()
 
-        with open(self.in_dir + '/' + jsondoc, 'r', encoding='utf8') as in_file:
-            jsondata = json.load(in_file)
+        with open(self.in_dir + '/' + jsondoc, 'r', encoding='utf8') as json_doc:
 
-            self.freq_dict[jsondoc] = {}
-            self.freq_dict[jsondoc]['Date'] = int(jsondata['Date'])
-            self.freq_dict[jsondoc]['Frequencies'] = {}
+            try:
 
-            if self.binary:
-                text = set(nltk.ngrams(jsondata[self.text_type], n))
+                json_data = json.load(json_doc)
 
-                for keyword in self.keys:
-                    if keyword in text:
-                        self.freq_dict[jsondoc]['Frequencies'][' '.join(keyword)] = 1
-                    else:
-                        self.freq_dict[jsondoc]['Frequencies'][' '.join(keyword)] = 0
+                for k in list(json_data.keys()):
 
-            else:
-                text = list(nltk.ngrams(jsondata[self.text_type], n))
-                self.freq_dict[jsondoc]['Text Length'] = len(text)
+                    cur_key = "{0}_{1}".format(jsondoc, k)
+                    self._update_freq_dict(cur_key, json_data, n)
 
-                fdist = nltk.FreqDist(text)
+            except json.decoder.JSONDecodeError:
 
-                for keyword in self.keys:
-                    self.freq_dict[jsondoc]['Frequencies'][' '.join(keyword)] = fdist[keyword]
+                print("Error loading file {}".format(jsondoc))
 
     def take_frequencies(self):
         """
