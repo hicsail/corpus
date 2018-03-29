@@ -74,6 +74,7 @@ def build_reddit_json(file: RedditComment):
             'Author': file.author,
             'Date': file.date,
             'Sub ID': file.sub_id,
+            'Subreddit':file.subreddit,
             'Score': file.score,
             'Upvotes': file.upvotes,
             'Controversy': file.controversy,

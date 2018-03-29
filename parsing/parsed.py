@@ -59,6 +59,7 @@ class RedditComment:
     def __init__(
             self,
             sub_id='',
+            subreddit='',
             author='',
             date='',
             score=0,
@@ -67,6 +68,7 @@ class RedditComment:
             comment_id=''):
 
         self.sub_id = sub_id
+        self.subreddit = subreddit
         self.author = author
         self.date = date
         self.score = score
