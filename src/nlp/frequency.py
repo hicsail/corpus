@@ -79,7 +79,6 @@ class Frequency:
 
             for i in range(len(text) - 1, -1, -1):
 
-                # Delete empty strings and single characters
                 if text[i] in self.stop_words:
                     del text[i]
 
