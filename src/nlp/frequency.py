@@ -158,90 +158,41 @@ class Frequency:
 
         return FrequencyResults(results, num_docs, 'Global frequency (%)', self.name)
 
+    def _take_average_freq(self):
+
+        num_docs = num_dict(self.year_list)
+        freq = self.frequency_record
+        results = num_dict(self.year_list, self.keys, 1)
+
+        for year in self.year_list[:-1]:
+
+            if freq[year]['TOTAL_WORDS'] > 0:
+
+                total = 0
+
+                for k in self.keys:
+
+                    total += freq[year]['FDIST'][k]
+                    results[year][k] = freq[year]['FDIST'][k] / freq[year]['NUM_DOCS']
+
+                    num_docs[year] = freq[year]['NUM_DOCS']
+
+                results[year]['TOTAL'] = total / freq[year]['NUM_DOCS']
+
+        return results, num_docs
+
     def take_average_freq(self):
         """
         Reduce leaf entries in frequency dicts to obtain
         average occurrence per document for each period / keyword pair.
         """
 
-        num_docs = self.num_docs()
-
-        if self.avg_freq is not None:
-            return FrequencyResults(self.avg_freq, num_docs, 'Average frequency', self.name)
-
         if self.frequency_record is None:
             self.set_frequency_record()
 
-        freq = self.frequency_record
+        results, num_docs = self._take_average_freq()
 
-        results = num_dict(self.year_list, self.keys, 1)
-
-        for year in self.year_list:
-
-            if len(freq[year]['TOTAL']) > 0:
-                results[year]['TOTAL'] = \
-                    sum(x for x, _ in freq[year]['TOTAL']) / len(freq[year]['TOTAL'])
-
-            for k in self.keys:
-
-                if len(freq[year][k]) > 0:
-                    results[year][k] = \
-                        sum(x for x, _ in freq[year][k]) / len(freq[year][k])
-
-        self.avg_freq = results
-
-        return FrequencyResults(results, self.num_docs, 'Average frequency', self.name)
-
-    def take_variance(self):
-        """
-        Combine & reduce leaf entries in frequency and average frequency
-        dicts to obtain the variance for each period / keyword pair.
-        """
-
-        if self.variance is not None:
-            return FrequencyResults(self.variance, self.num_docs, 'Variance', self.name)
-
-        if self.frequency_record is None:
-            self.set_frequency_record()
-
-        if self.avg_freq is None:
-            self.take_average_freq()
-
-        freq = self.frequency_record
-        avg = self.avg_freq
-
-        results = num_dict(self.year_list, self.keys, 1)
-        num_docs = num_dict(self.year_list, nested=0)
-
-        for year in self.year_list:
-
-            num_docs[year] = len(freq[year]['TOTAL'])
-
-            if len(freq[year]['TOTAL']) > 0:
-
-                var = []
-                for fr in freq[year]['TOTAL']:
-
-                    v = math.pow(fr[0] - avg[year]['TOTAL'], 2)
-                    var.append(v)
-
-                results[year]['TOTAL'] = sum(var) / len(var)
-
-            for k in self.keys:
-
-                if len(freq[year][k]) > 0:
-
-                    var = []
-                    for fr in freq[year][k]:
-
-                        v = math.pow(fr[0] - avg[year][k], 2)
-                        var.append(v)
-
-                    results[year][k] = sum(var) / len(var)
-
-        self.variance = results
-
-        return FrequencyResults(results, num_docs, 'Variance', self.name)
+        return FrequencyResults(results, num_docs, 'Average frequency', self.name)
 
     @staticmethod
     def _top_n(fdist: nltk.FreqDist, num: int, total_words: dict):

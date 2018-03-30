@@ -27,7 +27,7 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
-    def frequency(self, name, year_list, key_list, text_type: str='Full Text', stop_words: [list, set, str, None]=None):
+    def frequency(self, name, year_list, key_list, text_type: str='Text', stop_words: [list, set, str, None]=None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -43,7 +43,7 @@ class Corpus:
 
         return f.take_freq()
 
-    def avg_frequency(self, name, year_list, key_list, text_type: str='Full Text', stop_words: [list, set, str, None]=None):
+    def avg_frequency(self, name, year_list, key_list, text_type: str='Text', stop_words: [list, set, str, None]=None):
         """
         Measure average frequency of a set of keywords per document across a corpus.
         """
@@ -58,22 +58,6 @@ class Corpus:
         )
 
         return f.take_average_freq()
-
-    def variance(self, name, year_list, key_list, text_type: str='Full Text', stop_words: [list, set, str, None]=None):
-        """
-        Measure variance in keyword frequency across a corpus.
-        """
-
-        f = frequency.Frequency(
-            name,
-            self.in_dir,
-            text_type,
-            year_list,
-            key_list,
-            stop_words
-        )
-
-        return f.take_variance()
 
     def top_n(self, name, year_list, text_type, num_words: int=10, n_gram: int=1):
         """
