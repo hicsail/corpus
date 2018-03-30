@@ -66,7 +66,7 @@ class Frequency:
 
         return lengths.pop()
 
-    def _update_frequency_lists(self, frequency_lists, json_data, n):
+    def _update_frequency_lists(self, frequency_lists, json_data, n: int):
         """
         Update frequency lists with text from a volume.
         """
@@ -84,36 +84,30 @@ class Frequency:
 
             target = determine_year(year, self.year_list)
 
-            total_words = len(list(text))
-            all_keys = 0
-
             fdist = nltk.FreqDist(text)
 
-            for k in self.keys:
-
-                all_keys += fdist[k]
-                frequency_lists[target][k].append((fdist[k], total_words))
-
-            frequency_lists[target]['TOTAL'].append((all_keys, total_words))
+            if frequency_lists[target] == 0:
+                frequency_lists[target] = {}
+                frequency_lists[target]['FDIST'] = fdist
+                frequency_lists[target]['NUM_DOCS'] = 1
+                frequency_lists[target]['TOTAL_WORDS'] = len(text)
+            else:
+                frequency_lists[target]['FDIST'] |= fdist
+                frequency_lists[target]['NUM_DOCS'] += 1
+                frequency_lists[target]['TOTAL_WORDS'] += len(text)
 
         return self
 
     def set_frequency_record(self):
-        """
-        Construct a dictionary that stores the
-        frequencies of each word across a corpus.
-        """
 
-        if self.frequency_record is not None:
-            return
+        freq_rec = num_dict(self.year_list)
+
+        print("Calculating frequency records.\n")
 
         if self.keys is None:
-            raise ValueError("No keywords specified.\n")
-
-        frequency_lists = list_dict(self.year_list, self.keys, 1)
-        n = self.detect_n()
-
-        print("Taking word counts for key list {}".format(self.keys))
+            n = 1
+        else:
+            n = self.detect_n()
 
         for subdir, dirs, files in os.walk(self.in_dir):
             for json_doc in tqdm.tqdm(files):
@@ -124,34 +118,14 @@ class Frequency:
                         try:
 
                             json_data = json.load(in_file)
-
                             for k in list(json_data.keys()):
-                                self._update_frequency_lists(frequency_lists, json_data[k], n)
+                                self._update_frequency_lists(freq_rec, json_data[k], n)
 
                         except json.decoder.JSONDecodeError:
 
                             print("Error loading file {}".format(json_doc))
 
-        self.frequency_record = frequency_lists
-        self.calculate_num_docs()
-
-        return self
-
-    def calculate_num_docs(self):
-        """
-        Calculate the number of documents per period.
-        """
-
-        num_docs = num_dict(self.year_list, nested=0)
-        freq = self.frequency_record
-
-        for year in self.year_list:
-
-            num_docs[year] = len(freq[year]['TOTAL'])
-
-        self.num_docs = num_docs
-
-        return self
+        self.frequency_record = freq_rec
 
     def take_freq(self):
         """
@@ -160,41 +134,29 @@ class Frequency:
         for each period / keyword pair.
         """
 
-        if self.global_freq is not None:
-            return FrequencyResults(self.global_freq, self.num_docs, 'Global frequency (%)', self.name)
-
         if self.frequency_record is None:
             self.set_frequency_record()
 
+        num_docs = num_dict(self.year_list)
         freq = self.frequency_record
-
         results = num_dict(self.year_list, self.keys, 1)
 
-        for year in self.year_list:
+        for year in self.year_list[:-1]:
 
-            if len(freq[year]['TOTAL']) > 0:
+            if freq[year]['TOTAL_WORDS'] > 0:
 
-                w_freq = sum(x for x, _ in freq[year]['TOTAL'])
-                total = sum(y for _, y in freq[year]['TOTAL'])
-                try:
-                    results[year]['TOTAL'] = w_freq / total
-                except ZeroDivisionError:
-                    results[year]['TOTAL'] = 0
+                total = 0
 
-            for k in self.keys:
+                for k in self.keys:
 
-                if len(freq[year][k]) > 0:
+                    total += freq[year]['FDIST'][k]
+                    results[year][k] = freq[year]['FDIST'][k] / freq[year]['TOTAL_WORDS']
 
-                    w_freq = sum(x for x, _ in freq[year][k])
-                    total = sum(y for _, y in freq[year][k])
-                    try:
-                        results[year][k] = w_freq / total
-                    except ZeroDivisionError:
-                        results[year][k] = 0
+                    num_docs[year] = freq[year]['NUM_DOCS']
 
-        self.global_freq = results
+                results[year]['TOTAL'] = total / freq[year]['TOTAL_WORDS']
 
-        return FrequencyResults(results, self.num_docs, 'Global frequency (%)', self.name)
+        return FrequencyResults(results, num_docs, 'Global frequency (%)', self.name)
 
     def take_average_freq(self):
         """
