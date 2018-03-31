@@ -1,6 +1,5 @@
 import tqdm
 import nltk
-import math
 
 from src.results import *
 
@@ -76,7 +75,13 @@ class Frequency:
         if self.frequency_record is None:
             self.set_frequency_record()
 
-        j_file = json.dumps(self.frequency_record, sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
+        j_file = json.dumps(
+            self.frequency_record,
+            sort_keys=True,
+            indent=4,
+            separators=(',', ': '),
+            ensure_ascii=False
+        )
 
         with open(out_path, 'w', encoding='utf8') as out_file:
             out_file.write(j_file)
@@ -170,29 +175,46 @@ class Frequency:
             n = self.detect_n()
 
         for subdir, dirs, files in os.walk(self.in_dir):
-            for json_doc in tqdm.tqdm(files):
-                if json_doc[0] != ".":
+            # TODO: probably doesn't work
+            if len(dirs) > 0:
+                for dir in dirs:
+                    for json_doc in tqdm.tqdm(files):
+                        if json_doc[0] != ".":
 
-                    with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+                            with open(self.in_dir + "/" + dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
-                        try:
+                                try:
 
-                            json_data = json.load(in_file)
-                            for k in list(json_data.keys()):
+                                    json_data = json.load(in_file)
+                                    for k in list(json_data.keys()):
 
-                                self._update_frequency_lists(frequency_lists, json_data[k], n)
+                                        self._update_frequency_lists(frequency_lists, json_data[k], n)
 
-                        except json.decoder.JSONDecodeError:
+                                except json.decoder.JSONDecodeError:
 
-                            print("Error loading file {}".format(json_doc))
+                                    print("Error loading file {}".format(json_doc))
+            else:
+                for json_doc in tqdm.tqdm(files):
+                    if json_doc[0] != ".":
+
+                        with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+
+                            try:
+
+                                json_data = json.load(in_file)
+                                for k in list(json_data.keys()):
+
+                                    self._update_frequency_lists(frequency_lists, json_data[k], n)
+
+                            except json.decoder.JSONDecodeError:
+
+                                print("Error loading file {}".format(json_doc))
 
         self.frequency_record = self._clean_records(frequency_lists)
 
     def take_freq(self):
         """
-        Reduce leaf entries in frequency dicts to obtain
-        average frequencies (as a percentage of total words)
-        for each period / keyword pair.
+        Calculate keyword frequencies for each period from frequency records
         """
 
         if self.frequency_record is None:
@@ -219,7 +241,7 @@ class Frequency:
 
     def _take_average_freq(self):
         """
-        Calculate average keyword frequency per document w/r/t a list of keywords.
+        Calculate average keyword frequency per document from frequency records.
         """
 
         num_docs = num_dict(self.year_list)
@@ -244,7 +266,7 @@ class Frequency:
 
     def take_average_freq(self):
         """
-        Calculate average keyword frequency per document w/r/t a list of keywords.
+        Calculate average keyword frequency per document from frequency records.
         """
 
         if self.frequency_record is None:

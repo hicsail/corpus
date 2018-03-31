@@ -10,8 +10,6 @@ use across a large corpus of British and Danish literature.
 
 ### Data Format
 
-TODO: OUTDATED
-
 The functions in this library assume a particular schema for input data. In particular, a _corpus_ is expected
 to be of the form:
 
@@ -26,19 +24,41 @@ to be of the form:
 
 And each JSON file is expected to be structured as follows:
 
-```$xslt
-'Title': <string>,
-'Author': <string>,
-'Year Published': <string>,
-'Full Text': <list of string tokens>
 ```
+{
+    "0": {
+        'Title': <string>,
+        'Author': <string>,
+        'Year Published': <string>,
+        'Text': <list of string tokens>
+        }
+    "1": {
+        'Title': <string>,
+        'Author': <string>,
+        'Year Published': <string>,
+        'Text': <list of string tokens>
+        }
+    ...
+    ...
+    "<n>": {
+        'Title': <string>,
+        'Author': <string>,
+        'Year Published': <string>,
+        'Text': <list of string tokens>
+        }
+}
+
+```
+
+Each JSON file is assumed to hold multiple voluems (`0, 1, ... <n>`) so as to save space when dealing
+with large corpora of small volumes (reddit comments, tweets, etc.).
 
 ### Data
 
-Several parsing scripts are provided at `parsing/scripts` that can be used to build datasets from
-several sources. 
+Several parsing scripts are provided at `parsing/` that can be used to build datasets from
+several sources. Right now, however, only parsing for the Reddit dataset (at `parsing/reddit`) 
+is up to date.
 
-TODO: Explain the different data sources, provide URLs
 
 ### Basic Usage
 
@@ -58,33 +78,57 @@ To build a record of word frequencies over the periods 1800-1820 & 1820-1840:
         [1800, 1820, 1840],
         ['<word1', '<word2>', ... '<wordN>']
     )
+    
+    MyFrequency.take_freq()
 ```
 
-Finally, the results can be displayed to terminal, or written to a JSON file for later use: 
+The results can be displayed to terminal, or written to a JSON file for later use: 
 
 ```
     MyFrequency.display()
     
-    MyFrequency.write_to_json('<output_path>')
+    MyFrequency.write_to_json('<output_path1>')
+```
+
+When working with a very large corpus, it is useful to amortize the cost of calculating
+word frequencies by writing the frequency records to file:
+
+```
+    MyFrequency.write_freq('<output_path2>,json')
+```
+
+Those records can then be loaded in the future and applied to further queries as follows:
+
+```
+    MyCorpus = corpus.Corpus(
+        'MyCorpus',
+        '<path_to_corpus>'
+    )
+    
+    MyFrequency = MyCorpus.frequency(
+        'MyFrequency',
+        [1800, 1820, 1840],
+        ['<word1', '<word2>', ... '<wordN>']
+    )
+    
+    MyFrequency.frequency_from_file('<path_from_2>.json')
+    
+    MyFrequency.take_freq()
 ```
 
 
 ### Graphing Results
 
-One or more corpora can be graphed alongside one another as follows:
+Frequency results can be graphed:
 
+```    
+    MyGraph = graph.GraphFrequency([MyFrequency]).create_plot()
+    
+    MyGraph.show()
 ```
-    CorpusOne = corpus.Corpus(
-        'CorpOne',
-        '<path_to_corpus_one>'
-    )
-    
-    FreqOne = CorpusOne.frequency(
-        'freq_one',
-        [1800, 1820, 1840],
-        ['<word1>', '<word2>', ... , '<wordN>']
-    )
-    
+
+Multiple corpora can also be graphed alongside one another:
+```    
     CorpusTwo = corpus.Corpus(
         'CorpTwo',
         '<path_to_corpus_two>'
@@ -96,9 +140,11 @@ One or more corpora can be graphed alongside one another as follows:
         ['<new_word1>', '<new_word2>', ... , '<new_wordN>']
     )
     
-    MyGraph = graph.GraphFrequency([FreqOne, FreqTwo]).create_plot()
+    FreqTwo.take_freq()
     
-    MyGraph.show()
+    MyGraphTwo = graph.GraphFrequency([MyFrequency, FreqTwo]).create_plot()
+    
+    MyGraphTwo.show()
 ```
 
 Output JSON files can also be passed to a graph alongside Frequency objects:
@@ -106,10 +152,10 @@ Output JSON files can also be passed to a graph alongside Frequency objects:
 ```
     FreqTwo.write_to_json('<output_path>')
 
-    MyGraph = graph.GraphFrequency([FreqOne, '<output_path>']).create_plot().show()
+    MyGraph = graph.GraphFrequency([FreqOne, '<path_from_1>.json']).create_plot().show()
 ```
 
 ### Other Functions
 
 This library also provides TF-IDF scoring, LDA / LSI Topic Modeling, and Difference in Proportions functions that can
-be applied to corpora in ways similar to the above (documentation coming). 
+be applied to corpora in ways similar to the above. 
