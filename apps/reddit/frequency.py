@@ -15,7 +15,7 @@ if __name__ == '__main__':
         'Filtered'
     )
 
-    f.frequency_from_file('/Users/ben/Desktop/out.json')
+    f.frequency_from_file(sys.argv[1])
 
     f.take_freq().display()
 
