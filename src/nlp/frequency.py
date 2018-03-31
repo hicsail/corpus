@@ -121,7 +121,7 @@ class Frequency:
 
         return lengths.pop()
 
-    def _update_frequency_lists(self, frequency_lists, json_data, n: int):
+    def _update_frequency_lists(self, frequency_lists: dict, json_data, n: int):
         """
         Update frequency lists with text from a volume.
         """
@@ -175,40 +175,21 @@ class Frequency:
             n = self.detect_n()
 
         for subdir, dirs, files in os.walk(self.in_dir):
-            # TODO: probably doesn't work
-            if len(dirs) > 0:
-                for dir in dirs:
-                    for json_doc in tqdm.tqdm(files):
-                        if json_doc[0] != ".":
+            for json_doc in tqdm.tqdm(files):
+                if json_doc[0] != ".":
 
-                            with open(self.in_dir + "/" + dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+                    with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
-                                try:
+                        try:
 
-                                    json_data = json.load(in_file)
-                                    for k in list(json_data.keys()):
+                            json_data = json.load(in_file)
+                            for k in list(json_data.keys()):
 
-                                        self._update_frequency_lists(frequency_lists, json_data[k], n)
+                                self._update_frequency_lists(frequency_lists, json_data[k], n)
 
-                                except json.decoder.JSONDecodeError:
+                        except json.decoder.JSONDecodeError:
 
-                                    print("Error loading file {}".format(json_doc))
-            else:
-                for json_doc in tqdm.tqdm(files):
-                    if json_doc[0] != ".":
-
-                        with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
-
-                            try:
-
-                                json_data = json.load(in_file)
-                                for k in list(json_data.keys()):
-
-                                    self._update_frequency_lists(frequency_lists, json_data[k], n)
-
-                            except json.decoder.JSONDecodeError:
-
-                                print("Error loading file {}".format(json_doc))
+                            print("Error loading file {}".format(json_doc))
 
         self.frequency_record = self._clean_records(frequency_lists)
 
@@ -277,7 +258,7 @@ class Frequency:
         return FrequencyResults(results, num_docs, 'Average frequency', self.name)
 
     @staticmethod
-    def _top_n(fdist: nltk.FreqDist, num: int, total_words: int):
+    def _top_n(fdist, num: int, total_words: int):
         """
         Helper to top_n. Returns a list of lists, with each
         list representing the top n words for a given period.
@@ -313,8 +294,12 @@ class Frequency:
             num_docs[year] = freq[year]['NUM_DOCS']
 
             if freq[year]['NUM_DOCS'] > num:
-                n_words[year].extend(self._top_n(freq[year]['FDIST'], num, freq[year]['TOTAL_WORDS']))
+                n_words[year].extend(
+                    self._top_n(freq[year]['FDIST'], num, freq[year]['TOTAL_WORDS'])
+                )
             else:
-                n_words[year].extend(self._top_n(freq[year]['FDIST'], freq[year]['NUM_DOCS'], freq[year]['TOTAL_WORDS']))
+                n_words[year].extend(
+                    self._top_n(freq[year]['FDIST'], freq[year]['NUM_DOCS'], freq[year]['TOTAL_WORDS'])
+                )
 
         return TopResults(n_words, num_docs, self.name)
