@@ -27,7 +27,8 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
-    def frequency(self, name, year_list, key_list: [list, None]=None, text_type: str='Text', stop_words: [list, set, str, None]=None):
+    def frequency(self, name: str, year_list: list, key_list: [list, None]=None,
+                  text_type: str='Text', stop_words: [list, set, str, None]=None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -43,7 +44,7 @@ class Corpus:
 
         return f
 
-    def tf_idf(self, name, year_list, text_type: str='Text', stop_words: [list, set, None]=None):
+    def tf_idf(self, name: str, year_list: list, text_type: str='Text', stop_words: [list, set, None]=None):
         """
         Find documents with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
@@ -74,7 +75,7 @@ class Corpus:
 
         return rf.take_frequencies()
 
-    def topic_model(self, name, year_list, text_type: str='Text', stop_words: [list, set, None]=None):
+    def topic_model(self, name: str, year_list: list, text_type: str='Text', stop_words: [list, set, None]=None):
         """
         Build generic Topic Model object, on which lda_model() or lsi_model() can be called.
         """
@@ -89,7 +90,7 @@ class Corpus:
 
         return t
 
-    def lda_model(self, name, year_list, text_type: str='Text',  num_topics: [int, None] = 10,
+    def lda_model(self, name: str, year_list: list, text_type: str='Text',  num_topics: [int, None] = 10,
                   passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None]=None):
         """
         Build LDA Topic Models for each period within a corpus.
@@ -105,7 +106,7 @@ class Corpus:
 
         return t.lda_model(num_topics, passes, seed)
 
-    def lsi_model(self, name, year_list, text_type: str='Text',  num_topics: [int, None] = 10,
+    def lsi_model(self, name: str, year_list: list, text_type: str='Text', num_topics: [int, None] = 10,
                   stochastic=False, stop_words: [list, set, None]=None):
         """
         Build LSI Topic Models for each period within a corpus.
@@ -122,7 +123,7 @@ class Corpus:
         return t.lsi_model(num_topics, stochastic)
 
     @staticmethod
-    def detect_n(keys):
+    def detect_n(keys: list):
         """
         Detect value of n for n-grams.
         """
@@ -136,7 +137,7 @@ class Corpus:
         return lengths.pop()
 
     @staticmethod
-    def _build_json(title, author, keyword, year, text):
+    def _build_json(title: str, author: str, keyword: str, year: int, text: list):
         """
         Build json object before writing to disk.
         """
@@ -151,7 +152,7 @@ class Corpus:
 
         return jfile
 
-    def _write_extract(self, out_dir, words, year, index, sub_index, title, author, text):
+    def _write_extract(self, out_dir: str, words: list, year: int, index, sub_index, title, author, text):
         """
         Write file from sub-corpus to disk.
         """
@@ -170,7 +171,7 @@ class Corpus:
                 )
             )
 
-    def build_sub_corpus(self, name, output_dir: str, key_list: list, text_type: str='Full Text',
+    def build_sub_corpus(self, name: str, output_dir: str, key_list: list, text_type: str='Text',
                          doc_size: int=20, y_range: [list, None]=None):
         """
         From a larger corpus, construct a sub-corpus containing
