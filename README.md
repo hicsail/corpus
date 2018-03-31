@@ -2,6 +2,10 @@
 
 Calculate and display NLP metrics on large corpora over time. 
 
+### Requirements
+
+Python 3.5+, mostly due to type annotations.
+
 ### Purpose
 
 This library provides a simple interface to compute various NLP metrics on large corpora. It was originally
@@ -13,7 +17,7 @@ use across a large corpus of British and Danish literature.
 The functions in this library assume a particular schema for input data. In particular, a _corpus_ is expected
 to be of the form:
 
-```$xslt
+```
 <root_directory>/
     <volume1.json>
     <volume2.json>
