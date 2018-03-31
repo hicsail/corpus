@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from nltk.stem.snowball import SnowballStemmer
 from gensim import corpora
@@ -110,6 +111,21 @@ def stem(word: str, language: [str, None] = 'english'):
 
     return '{0}: {1}'.format(word, stemmed)
 
+
+# TODO: ask user if they want to overwrite directory or add to it, if it exists
+def build_out(out_dir: str):
+    """
+    Build output directory, overwrite if it exists.
+    """
+
+    if out_dir is not None:
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
+        else:
+            shutil.rmtree(out_dir)
+            os.mkdir(out_dir)
+    else:
+        _fail("Please specify output directory.")
 
 
 

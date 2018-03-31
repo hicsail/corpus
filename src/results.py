@@ -52,7 +52,7 @@ class FrequencyResults(Results):
         return d
 
     @staticmethod
-    def _build_json(d):
+    def _build_json(d: dict):
         """
         Transform results dictionary to JSON object.
         """
