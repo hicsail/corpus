@@ -16,6 +16,8 @@ if __name__ == '__main__':
         'Filtered'
     )
 
+    f.save_models(sys.argv[2])
+
     f.top_n('people').display()
 
-    f.write_tfidf(sys.argv[2])
+
