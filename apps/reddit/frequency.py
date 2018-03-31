@@ -8,11 +8,15 @@ if __name__ == '__main__':
         sys.argv[1]
     )
 
-    e1 = c.frequency(
+    f = c.frequency(
         'f1',
-        [200500, 200600],
+        [200500, 200600, 200700, 200800],
         ['terrorist'],
-        'Text'
+        'Filtered'
     )
 
-    e1.write_to_json('/Users/ben/Desktop/out')
+    f.frequency_from_file('/Users/ben/Desktop/out.json')
+
+    f.take_freq().display()
+
+    f.top_n().display()
