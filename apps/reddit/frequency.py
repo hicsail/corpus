@@ -15,8 +15,10 @@ if __name__ == '__main__':
         'Filtered'
     )
 
-    f.frequency_from_file(sys.argv[1])
+    f.frequency_from_file(sys.argv[2])
 
     f.take_freq().display()
+
+    f.take_average_freq().display()
 
     f.top_n().display()
