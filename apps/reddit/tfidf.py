@@ -16,7 +16,7 @@ if __name__ == '__main__':
         'Filtered'
     )
 
-    f.save_models(sys.argv[2])
+    f.load_models('/Users/ben/Desktop/t_out/')
 
     f.top_n('people').display()
 
