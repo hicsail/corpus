@@ -184,7 +184,7 @@ class TopResults(Results):
                 for k in self.d[self.years[i]]:
                     t.write(
                         "\"{0}\": {1}%\n"
-                        .format(" ".join(k[0]), str(k[1]))
+                        .format(k[0], str(k[1]))
                     )
 
     def display(self):
@@ -206,7 +206,7 @@ class TopResults(Results):
             for k in self.d[self.years[i]]:
                 print(
                     "\"{0}\": {1}%"
-                    .format(" ".join(k[0]), str(k[1]))
+                    .format(k[0], str(k[1]))
                 )
 
 

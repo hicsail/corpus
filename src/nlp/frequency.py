@@ -21,7 +21,7 @@ class Frequency:
         self.text_type = text_type
         self.year_list = year_list
         if keys is not None:
-            self.keys = build_keys(keys)
+            self.keys = keys
         else:
             self.keys = None
         if stop_words is not None:
@@ -35,10 +35,6 @@ class Frequency:
             self.stop_words = {}
 
         self.frequency_record = None
-        self.global_freq = None
-        self.avg_freq = None
-        self.variance = None
-        self.num_docs = None
 
     def stop_words_from_json(self, file_path: str):
         """
@@ -50,6 +46,60 @@ class Frequency:
             json_data = json.load(in_file)
             self.stop_words = set(json_data['Words'])
 
+    def frequency_from_file(self, file_path: str):
+        """
+        Load a precomputed frequency distribution record from a json file.
+        """
+
+        with open(file_path, 'r', encoding='utf8') as in_file:
+
+            json_data = json.load(in_file)
+
+            freq_dict = {}
+
+            for year in json_data.keys():
+
+                freq_dict[int(year)] = {}
+                freq_dict[int(year)]['NUM_DOCS'] = json_data[year]['NUM_DOCS']
+                freq_dict[int(year)]['TOTAL_WORDS'] = json_data[year]['TOTAL_WORDS']
+                freq_dict[int(year)]['FDIST'] = json_data[year]['FDIST']
+
+            self.frequency_record = freq_dict
+
+        return self
+
+    def write_freq(self, out_path: str):
+        """
+        Write this object's frequency records to file for later use.
+        """
+
+        if self.frequency_record is None:
+            self.set_frequency_record()
+
+        j_file = json.dumps(self.frequency_record, sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
+
+        with open(out_path, 'w', encoding='utf8') as out_file:
+            out_file.write(j_file)
+
+    def _clean_records(self, freq_rec):
+        """
+        Convert keys in frequency record from tuples to strings.
+        """
+
+        freq_dict = {}
+
+        for year in self.year_list[:-1]:
+
+            freq_dict[year] = {}
+            freq_dict[year]['NUM_DOCS'] = freq_rec[year]['NUM_DOCS']
+            freq_dict[year]['TOTAL_WORDS'] = freq_rec[year]['TOTAL_WORDS']
+            freq_dict[year]['FDIST'] = {}
+
+            for k in freq_rec[year]['FDIST'].keys():
+                freq_dict[year]['FDIST'][' '.join(k)] = freq_rec[year]['FDIST'][k]
+
+        return freq_dict
+
     def detect_n(self):
         """
         Detect value of n for n-grams.
@@ -60,7 +110,7 @@ class Frequency:
 
         lengths = set()
         for k in self.keys:
-            lengths.add(len(k))
+            lengths.add(len(k.split()))
 
         assert(len(lengths) == 1)
 
@@ -78,29 +128,39 @@ class Frequency:
             text = list(nltk.ngrams(json_data[self.text_type], n))
 
             for i in range(len(text) - 1, -1, -1):
-
                 if text[i] in self.stop_words:
                     del text[i]
 
             target = determine_year(year, self.year_list)
-
             fdist = nltk.FreqDist(text)
 
             if frequency_lists[target] == 0:
+
                 frequency_lists[target] = {}
-                frequency_lists[target]['FDIST'] = fdist
+                for kw in fdist:
+                    frequency_lists[target]['FDIST'] = {}
+                    frequency_lists[target]['FDIST'][kw] = fdist[kw]
                 frequency_lists[target]['NUM_DOCS'] = 1
                 frequency_lists[target]['TOTAL_WORDS'] = len(text)
+
             else:
-                frequency_lists[target]['FDIST'] |= fdist
+
+                for kw in fdist:
+                    try:
+                        frequency_lists[target]['FDIST'][kw] += fdist[kw]
+                    except KeyError:
+                        frequency_lists[target]['FDIST'][kw] = fdist[kw]
                 frequency_lists[target]['NUM_DOCS'] += 1
                 frequency_lists[target]['TOTAL_WORDS'] += len(text)
 
         return self
 
     def set_frequency_record(self):
+        """
+        Calculate frequency distributions per period.
+        """
 
-        freq_rec = num_dict(self.year_list)
+        frequency_lists = num_dict(self.year_list)
 
         print("Calculating frequency records.\n")
 
@@ -119,13 +179,14 @@ class Frequency:
 
                             json_data = json.load(in_file)
                             for k in list(json_data.keys()):
-                                self._update_frequency_lists(freq_rec, json_data[k], n)
+
+                                self._update_frequency_lists(frequency_lists, json_data[k], n)
 
                         except json.decoder.JSONDecodeError:
 
                             print("Error loading file {}".format(json_doc))
 
-        self.frequency_record = freq_rec
+        self.frequency_record = self._clean_records(frequency_lists)
 
     def take_freq(self):
         """
@@ -146,12 +207,10 @@ class Frequency:
             if freq[year]['TOTAL_WORDS'] > 0:
 
                 total = 0
-
                 for k in self.keys:
 
                     total += freq[year]['FDIST'][k]
                     results[year][k] = freq[year]['FDIST'][k] / freq[year]['TOTAL_WORDS']
-
                     num_docs[year] = freq[year]['NUM_DOCS']
 
                 results[year]['TOTAL'] = total / freq[year]['TOTAL_WORDS']
@@ -159,6 +218,9 @@ class Frequency:
         return FrequencyResults(results, num_docs, 'Global frequency (%)', self.name)
 
     def _take_average_freq(self):
+        """
+        Calculate average keyword frequency per document w/r/t a list of keywords.
+        """
 
         num_docs = num_dict(self.year_list)
         freq = self.frequency_record
@@ -174,7 +236,6 @@ class Frequency:
 
                     total += freq[year]['FDIST'][k]
                     results[year][k] = freq[year]['FDIST'][k] / freq[year]['NUM_DOCS']
-
                     num_docs[year] = freq[year]['NUM_DOCS']
 
                 results[year]['TOTAL'] = total / freq[year]['NUM_DOCS']
@@ -183,8 +244,7 @@ class Frequency:
 
     def take_average_freq(self):
         """
-        Reduce leaf entries in frequency dicts to obtain
-        average occurrence per document for each period / keyword pair.
+        Calculate average keyword frequency per document w/r/t a list of keywords.
         """
 
         if self.frequency_record is None:
@@ -195,78 +255,44 @@ class Frequency:
         return FrequencyResults(results, num_docs, 'Average frequency', self.name)
 
     @staticmethod
-    def _top_n(fdist: nltk.FreqDist, num: int, total_words: dict):
+    def _top_n(fdist: nltk.FreqDist, num: int, total_words: int):
         """
         Helper to top_n. Returns a list of lists, with each
         list representing the top n words for a given period.
         """
 
         keys = []
-        top = fdist.most_common(num)
+
+        s = [(k, fdist[k]) for k in sorted(fdist, key=fdist.get, reverse=True)]
+        top = s[:num]
 
         for tup in top:
             keys.append((tup[0], round((tup[1] / total_words) * 100, 4)))
 
         return keys
 
-    def _update_top(self, json_data, num_docs, num_words, fdists, n):
-        """
-        Update dictionaries storing top words with contents of a volume.
-        """
-
-        year = int(json_data["Date"])
-
-        if self.year_list[0] <= year < self.year_list[-1]:
-
-            text = list(nltk.ngrams(json_data[self.text_type], n))
-            target = determine_year(year, self.year_list)
-            num_docs[target] += 1
-
-            total_words = len(list(text))
-            num_words[target] += total_words
-            fdist = nltk.FreqDist(text)
-
-            if fdists[target] == 0:
-                fdists[target] = fdist
-            else:
-                fdists[target] |= fdist
-
-    def top_n(self, num: int, n: int=1):
+    def top_n(self, num: int=10):
         """
         Construct a dictionary that stores the top
         <num> words per period across a corpus.
         """
 
-        fdists = num_dict(self.year_list)
-        num_words = num_dict(self.year_list)
+        if self.frequency_record is None:
+            self.set_frequency_record()
+
+        num_docs = num_dict(self.year_list)
         n_words = list_dict(self.year_list)
-        num_docs = num_dict(self.year_list, nested=0)
+        freq = self.frequency_record
 
         print("Calculating top {0} words per period".format(str(num)))
 
-        for subdir, dirs, files in os.walk(self.in_dir):
-            for json_doc in tqdm.tqdm(files):
-                if json_doc[0] != ".":
-
-                    with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
-
-                        try:
-
-                            json_data = json.load(in_file)
-
-                            for k in list(json_data.keys()):
-
-                                self._update_top(json_data[k], num_docs, num_words, fdists, n)
-
-                        except json.decoder.JSONDecodeError:
-
-                            print("Error loading file {}".format(json_doc))
-
         for year in self.year_list[:-1]:
 
-            if len(fdists[year]) >= num:
-                n_words[year].extend(self._top_n(fdists[year], num, num_words[year]))
+            num_docs[year] = freq[year]['NUM_DOCS']
+
+            if freq[year]['NUM_DOCS'] > num:
+                n_words[year].extend(self._top_n(freq[year]['FDIST'], num, freq[year]['TOTAL_WORDS']))
             else:
-                n_words[year].extend(self._top_n(fdists[year], len(fdists[year]), num_words[year]))
+                n_words[year].extend(self._top_n(freq[year]['FDIST'], freq[year]['NUM_DOCS'], freq[year]['TOTAL_WORDS']))
 
         return TopResults(n_words, num_docs, self.name)

@@ -27,7 +27,7 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
-    def frequency(self, name, year_list, key_list, text_type: str='Text', stop_words: [list, set, str, None]=None):
+    def frequency(self, name, year_list, key_list: [list, None]=None, text_type: str='Text', stop_words: [list, set, str, None]=None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -41,39 +41,9 @@ class Corpus:
             stop_words
         )
 
-        return f.take_freq()
+        return f
 
-    def avg_frequency(self, name, year_list, key_list, text_type: str='Text', stop_words: [list, set, str, None]=None):
-        """
-        Measure average frequency of a set of keywords per document across a corpus.
-        """
-
-        f = frequency.Frequency(
-            name,
-            self.in_dir,
-            text_type,
-            year_list,
-            key_list,
-            stop_words
-        )
-
-        return f.take_average_freq()
-
-    def top_n(self, name, year_list, text_type, num_words: int=10, n_gram: int=1):
-        """
-        Identify most frequent < n > words per period across a corpus.
-        """
-
-        f = frequency.Frequency(
-            name,
-            self.in_dir,
-            text_type,
-            year_list,
-        )
-
-        return f.top_n(num_words, n_gram)
-
-    def tf_idf(self, name, year_list, keyword, n, text_type: str='Full Text', stop_words: [list, set, None]=None):
+    def tf_idf(self, name, year_list, text_type: str='Text', stop_words: [list, set, None]=None):
         """
         Find documents with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
@@ -86,9 +56,9 @@ class Corpus:
             stop_words
         )
 
-        return t.top_n(keyword, n)
+        return t
 
-    def raw_frequency(self, name: str,  key_list: list, text_type: str='Full Text', binary: bool=False):
+    def raw_frequency(self, name: str,  key_list: list, text_type: str='Text', binary: bool=False):
         """
         Build raw frequency tables for a corpus. Returned object is used for
         difference in proportions testing.
@@ -104,7 +74,22 @@ class Corpus:
 
         return rf.take_frequencies()
 
-    def lda_model(self, name, year_list, text_type: str='Full Text',  num_topics: [int, None] = 10,
+    def topic_model(self, name, year_list, text_type: str='Text', stop_words: [list, set, None]=None):
+        """
+        Build generic Topic Model object, on which lda_model() or lsi_model() can be called.
+        """
+
+        t = topic_model.TopicModel(
+            name,
+            self.in_dir,
+            text_type,
+            year_list,
+            stop_words
+        )
+
+        return t
+
+    def lda_model(self, name, year_list, text_type: str='Text',  num_topics: [int, None] = 10,
                   passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None]=None):
         """
         Build LDA Topic Models for each period within a corpus.
@@ -120,7 +105,7 @@ class Corpus:
 
         return t.lda_model(num_topics, passes, seed)
 
-    def lsi_model(self, name, year_list, text_type: str='Full Text',  num_topics: [int, None] = 10,
+    def lsi_model(self, name, year_list, text_type: str='Text',  num_topics: [int, None] = 10,
                   stochastic=False, stop_words: [list, set, None]=None):
         """
         Build LSI Topic Models for each period within a corpus.
