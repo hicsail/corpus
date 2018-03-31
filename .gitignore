@@ -75,6 +75,7 @@ target/
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+.python-version
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio.
 *.iml
