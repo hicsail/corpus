@@ -1,6 +1,7 @@
 import tqdm
 
 from gensim.models import TfidfModel
+from gensim.corpora import Dictionary
 
 from src.results import *
 
@@ -123,6 +124,20 @@ class Tfidf:
 
             dictionary = self.word_to_id[year]
             dictionary.save("{0}/{1}/{2}".format(out_dir, 'dictionaries', str(year)))
+
+    def load_models(self, in_dir: str):
+        """
+        Load dictionaries and tf-idf models from file.
+        """
+
+        self.tf_idf_models = {}
+        self.word_to_id = {}
+
+        for year in self.year_list:
+            self.tf_idf_models[year] = TfidfModel.load("{0}/tfidf/{1}".format(in_dir, str(year)))
+            self.word_to_id[year] = Dictionary.load("{0}/dictionaries/{1}".format(in_dir, str(year)))
+
+        return self
 
     def build_tf_idf_models(self):
         """
