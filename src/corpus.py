@@ -145,7 +145,7 @@ class Corpus:
                             'Author': author,
                             'Keyword': keyword,
                             'Year Published': year,
-                            'Full Text': text
+                            'Text': text
                             },
                            sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
 
