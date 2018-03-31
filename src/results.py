@@ -255,8 +255,8 @@ class TfidfResults(Results):
                 )
                 for k in self.d[self.years[i]]:
                     t.write(
-                        "\"{0}\": {1}%\n"
-                        .format(k[0], str(k[1]))
+                        "\"{0}[{1}]\": {2}%\n"
+                        .format(k[0], k[2], str(k[1]))
                     )
 
     def display(self):
@@ -278,8 +278,8 @@ class TfidfResults(Results):
                   .format(self.keyword))
             for k in self.d[self.years[i]]:
                 print(
-                    "\"{0}\": {1}%"
-                    .format(k[0], str(k[1]))
+                    "\"{0}[{1}]\": {2}%\n"
+                    .format(k[0], k[2], str(k[1]))
                 )
 
 
