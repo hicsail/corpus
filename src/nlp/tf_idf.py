@@ -85,6 +85,18 @@ class Tfidf:
 
         return self
 
+    def write_tfidf(self, out_dir: str):
+
+        if self.tf_idf_models is None:
+            self.build_tf_idf_models()
+
+        build_out(out_dir)
+
+        for year in self.year_list:
+
+            model = self.tf_idf_models[year]
+            model.save("{0}/{1}".format(out_dir, str(year)))
+
     def build_tf_idf_models(self):
         """
         Combines the word_to_id and corpora dictionaries
@@ -140,7 +152,7 @@ class Tfidf:
 
         return top_results
 
-    def top_n(self, keyword: str, n: int):
+    def top_n(self, keyword: str, n: int=10, name: str='Top Files'):
         """
         Iterates over the corpus and computes TF-IDF scores for each document,
         with respect to the precomputed TF-IDF models. Extracts results for a
@@ -175,6 +187,6 @@ class Tfidf:
 
         top_results = self._top_n(results, n)
 
-        return TfidfResults(top_results, num_docs, keyword)
+        return TfidfResults(top_results, num_docs, keyword, self.name)
 
 
