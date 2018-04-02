@@ -117,4 +117,4 @@ class DiffProportions:
             sig = scipy.stats.norm.cdf(z)
             diff_props[year] = [z, p, sig]
 
-        return DiffPropResults(diff_props, self.year_list)
+        return DiffPropResults(diff_props, self.year_list, self.name)

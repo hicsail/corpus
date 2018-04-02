@@ -83,7 +83,7 @@ class RawFrequency:
                 for k in list(json_data.keys()):
 
                     cur_key = "{0}_{1}".format(jsondoc, k)
-                    self._update_freq_dict(cur_key, json_data, n)
+                    self._update_freq_dict(cur_key, json_data[k], n)
 
             except json.decoder.JSONDecodeError:
 
