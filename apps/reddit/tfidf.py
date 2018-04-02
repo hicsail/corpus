@@ -16,7 +16,9 @@ if __name__ == '__main__':
         'Filtered'
     )
 
-    f.load_models('/Users/ben/Desktop/t_out/')
+    f.save_models('/Users/ben/Desktop/test_out/')
+
+    f.load_models('/Users/ben/Desktop/test_out/')
 
     f.top_n('people').display()
 

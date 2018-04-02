@@ -10,15 +10,15 @@ if __name__ == '__main__':
 
     f = c.frequency(
         'f1',
-        [200500, 200600, 200700, 200800],
+        [200500, 200600, 200700],
         ['terrorist'],
         'Filtered'
     )
 
     f.frequency_from_file(sys.argv[2])
 
-    f.take_freq().display()
+    e = f.take_freq()
 
-    f.take_average_freq().display()
+    e.display()
 
-    f.top_n().display()
+    e.write_to_json('/Users/ben/Desktop/graph_data')
