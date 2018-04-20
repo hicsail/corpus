@@ -1,6 +1,5 @@
 import tqdm
 import json
-import shutil
 import sys
 import nltk
 
