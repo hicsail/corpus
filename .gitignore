@@ -1,5 +1,6 @@
 # Directories.
 .idea/
+hax/
 
 # Common operating system files.
 .DS_Store
