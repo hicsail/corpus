@@ -63,7 +63,10 @@ def main():
     prefs = {"download.default_directory": args.o}
     chrome_opts.add_experimental_option("prefs", prefs)
 
-    driver = webdriver.Chrome(chrome_options=chrome_opts)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    cdriver = '{}/chromedriver'.format(dir_path)
+
+    driver = webdriver.Chrome(cdriver, chrome_options=chrome_opts)
 
     if args.csv is not None:
         urls = get_urls(args.csv)
