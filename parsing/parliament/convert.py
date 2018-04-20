@@ -1,7 +1,9 @@
-from nlp_scripts import parsing_help, parsed
-from deprecated import common
 import argparse, os, json
+
 from multiprocessing import Pool
+
+from parsing import parsed
+from parsing.utils import add_content, build_json, fail, build_out
 
 
 # assumes yyyy-mm-dd type input
@@ -13,11 +15,10 @@ def parse_date(year_string):
 # assumes ['sent-1', 'sent-2', ... , 'sent-n'] type input
 def parse_content(text_list, obj):
     for sent in text_list:
-        parsing_help.add_content(sent, obj, language)
+        add_content(sent, obj, language)
 
 
 def parse_title(title, keywords):
-    # wow so parse
     t = title.split()
     for w in t:
         if w.strip('.').lower() in keywords:
@@ -37,7 +38,7 @@ def parse_threaded(in_doc, in_dir, out_dir, keywords):
                 obj.a = jsondata['author']
                 parse_content(jsondata['content']['text'], obj)
                 with open(out_dir + in_doc[:-2] + 'json', 'w', encoding='utf-8') as out:
-                    out.write(parsing_help.build_json(obj))
+                    out.write(build_json(obj))
                     out.close()
         else:
             obj = parsed.Parsed()
@@ -46,8 +47,9 @@ def parse_threaded(in_doc, in_dir, out_dir, keywords):
             obj.a = jsondata['author']
             parse_content(jsondata['content']['text'], obj)
             with open(out_dir + in_doc[:-2] + 'json', 'w', encoding='utf-8') as out:
-                out.write(parsing_help.build_json(obj))
+                out.write(build_json(obj))
                 out.close()
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -66,7 +68,7 @@ def main():
     parse_all = False
 
     if args.i is None:
-        common.fail("Please specify input (-i) directory.")
+        fail("Please specify input (-i) directory.")
     if args.lang is None:
         language = "english"
     else:
@@ -78,7 +80,7 @@ def main():
         keywords = None
         parse_all = True
 
-    common.build_out(args.o)
+    build_out(args.o)
 
     thread_files = []
 
@@ -91,6 +93,7 @@ def main():
     pool.starmap(parse_threaded, thread_files)
     pool.close()
     pool.join()
+
 
 if __name__ == '__main__':
     main()

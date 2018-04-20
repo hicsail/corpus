@@ -16,12 +16,10 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen
 from urllib.error import HTTPError, URLError
-from multiprocessing import Pool, Process
+from multiprocessing import Pool
 import argparse
 import json
 import os
-import time
-import random
 import codecs
 import pickle
 import re
