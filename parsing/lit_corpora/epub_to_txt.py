@@ -64,7 +64,7 @@ def parse_books(input_dir, output_dir):
 
                 book = _parse_book("{0}/{1}".format(input_dir, epub_f))
 
-                with open("{0}/{1}.txt".format(output_dir, epub_f[:-4]), 'w') as txt_out:
+                with open("{0}/{1}.txt".format(output_dir, epub_f[:-5]), 'w') as txt_out:
 
                     txt_out.write("\n".join(book))
 
