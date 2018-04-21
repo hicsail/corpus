@@ -28,7 +28,7 @@ def csv_path(path_str):
     Return path to Banken CSV file.
     """
 
-    base_dir = '/'.join(path_str.split('/')[:-1])
+    base_dir = '/'.join(path_str.split('/')[:-2])
 
     return "{}/data/csv/LB/lit_banken.csv".format(base_dir)
 
