@@ -44,7 +44,8 @@ def parse_csv(csv_in):
 
     return ids
 
-def parse_txt(in_dir, ids, out_dir):
+
+def parse_txt(in_dir, mappings, out_dir):
     """
     Iterate over directory of Banken text files, parse each volume to a JSON object.
     """
@@ -53,21 +54,35 @@ def parse_txt(in_dir, ids, out_dir):
         for txt_f in tqdm.tqdm(files):
 
             if txt_f[0] != ".":
-                reading = False
+
                 obj = Parsed()
 
-                with open(in_dir + txt_f, 'r', encoding='utf-8') as txt_in:
-                    for line in txt_in:
-                        add_content(line, obj, 'german')
+                id_str = txt_f[:-4]
+                try:
+                    maps = mappings[id_str]
+                    valid = True
+                except KeyError:
+                    valid = False
 
-                with open(out_dir + txt_f[:-4] + '.json', 'w', encoding='utf-8') as out:
-                    out.write(build_json(obj))
-                    out.close()
+                if valid:
+
+                    obj.a = maps["AUTHOR"]
+                    obj.t = maps["TITLE"]
+                    obj.y = maps["PUBDATE"]
+
+                    with open(in_dir + txt_f, 'r', encoding='utf-8') as txt_in:
+                        for line in txt_in:
+                            add_content(line, obj, 'swedish')
+
+                    with open(out_dir + txt_f[:-4] + '.json', 'w', encoding='utf-8') as out:
+                        out.write(build_json(obj))
+                        out.close()
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("-i", help="input directory", action="store")
     parser.add_argument("-o", help="output directory", action="store")
 
     try:
@@ -80,5 +95,7 @@ if __name__ == '__main__':
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     mappings = parse_csv(csv_path(dir_path))
+
+    parse_txt(args.i, mappings, args.o)
 
 
