@@ -1,14 +1,14 @@
-import xml.etree.ElementTree as ET
+import os
+
+from bs4 import BeautifulSoup
 
 from parsing.utils import *
 from parsing.parsed import Parsed
 
-# TODO: ElementTree doesn't work with Dutch corpus, switch to BeautifulSoup
-
 
 class DutchParser:
 
-    def __init__(self, input_dir, output_dir="/tmp"):
+    def __init__(self, input_dir, output_dir="/tmp/DM_parsed/"):
 
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -16,6 +16,9 @@ class DutchParser:
 
     @staticmethod
     def set_csv():
+        """
+        Load CSV file with publication info mappings.
+        """
 
         ret = []
 
@@ -34,50 +37,72 @@ class DutchParser:
         return ret
 
     def map_files(self):
+        """
+        Populate dict with publication info.
+        """
 
         ret = {}
 
         csv_data = self.set_csv()
 
         for f in csv_data:
-            ret[f[0].strip("\"")] = f[3]
+            doc_id = f[0].strip("\"")
+            ret[doc_id] = {}
+
+            ret[doc_id]["author"] = f[1]
+            ret[doc_id]["title"] = f[2]
+            ret[doc_id]["pub_date"] = f[3]
 
         return ret
 
-    def get_text(self, root, obj):
+    @staticmethod
+    def get_text(tree, obj):
+        """
+        Grab text from an XML volume and add to Parsed object.
+        """
 
-        for child in root:
+        text = tree.find_all('text')
 
-            if "text" in child.tag:
-
-                print("found some shit")
-
-            else:
-
-                self.get_text(child, obj)
+        for t in text:
+            add_bs_xml_content(t.get_text(), obj, 'dutch')
 
     def _parse_files(self, doc, subdir):
         """
-        doc = xml_doc[:-9] # to get mapping
-        need to check if this doc exists in csv map
-
-        xml seems to start volume body with '<text>'
+        Parse an individual XML volume.
         """
-        try:
-            tree = ET.parse("{0}/{1}".format(self.input_dir, doc))
-        except FileNotFoundError:
-            tree = ET.parse("{0}/{1}".format(subdir, doc))
-        root = tree.getroot()
-        obj = Parsed()
-        self.get_text(root, obj)
 
-        return
+        try:
+            f = open("{0}/{1}".format(self.input_dir, doc), 'r')
+        except FileNotFoundError:
+            f = open("{0}/{1}".format(subdir, doc), 'r')
+
+        tree = BeautifulSoup(f.read(), 'xml')
+        obj = Parsed()
+        self.get_text(tree, obj)
+
+        pub_info = self.mapping[doc[:-9]]
+
+        obj.a = pub_info["author"]
+        obj.t = pub_info["title"]
+        obj.y = pub_info["pub_date"]
+
+        with open("{0}/{1}".format(self.output_dir, doc[:-9]), 'w', encoding='utf-8') as out:
+            out.write(build_json(obj))
+            out.close()
+
+        f.close()
 
     def parse_files(self):
+        """
+        Loop over a directory and parse all xml files.
+        """
+
+        os.makedirs(self.output_dir, exist_ok=True)
 
         for subdir, dirs, files in os.walk(self.input_dir):
             for xml_doc in files:
                 if xml_doc[-3:] == 'xml':
-                    self._parse_files(xml_doc, subdir)
+                    if xml_doc[:-9] in self.mapping:
+                        self._parse_files(xml_doc, subdir)
 
 
