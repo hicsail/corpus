@@ -26,3 +26,4 @@ smart-open==1.5.7
 statsmodels==0.8.0
 tqdm==4.23.0
 urllib3==1.22
+bs4
