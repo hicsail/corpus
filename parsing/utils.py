@@ -212,6 +212,42 @@ def add_xml_content(root, file: Parsed, language: str):
         file.add_filtered_stemmed(filtered_stemmed)
 
 
+def add_bs_xml_content(text: str, f: Parsed, lang: str):
+    """
+    Add content to Parsed object from BeautifulSoup XML parser output.
+    """
+
+    sentences = re.split("[.!?]", text)
+
+    for sentence in sentences:
+
+        s = clean_text(sentence)
+
+        if len(s) > 1:
+
+            f.add_content_sent(" ".join(s))
+            s_stem = stem_text(s, lang)
+            f.add_stemmed_sent(" ".join(s_stem))
+            s_filt = filter_text(s, lang)
+
+            if len(s_filt) > 1:
+
+                f.add_filtered_sent(" ".join(s_filt))
+                s_filt_stem = stem_text(s_filt, lang)
+                f.add_filtered_stemmed_sent(" ".join(s_filt_stem))
+
+    text_list = clean_text(text)
+
+    stem = stem_text(text_list, lang)
+    f.add_stemmed(stem)
+
+    filt = filter_text(text_list, lang)
+    f.add_filtered(filt)
+
+    filt_stem = stem_text(filt, lang)
+    f.add_filtered_stemmed(filt_stem)
+
+
 def clean_text(text: str):
     """
     Convert all letters to lowercase, remove non-alphabetic characters, remove empty strings
