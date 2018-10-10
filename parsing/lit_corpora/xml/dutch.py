@@ -1,5 +1,4 @@
-import os
-
+from multiprocessing import Pool
 from bs4 import BeautifulSoup
 
 from parsing.utils import *
@@ -8,11 +7,12 @@ from parsing.parsed import Parsed
 
 class DutchParser:
 
-    def __init__(self, input_dir, output_dir="/tmp/DM_parsed/"):
+    def __init__(self, input_dir, output_dir="/tmp/DM_parsed/", multi_thread=False):
 
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.mapping = self.map_files()
+        self.multi_thread = multi_thread
 
     @staticmethod
     def set_csv():
@@ -105,4 +105,21 @@ class DutchParser:
                     if xml_doc[:-9] in self.mapping:
                         self._parse_files(xml_doc, subdir)
 
+    def parse_files_threaded(self):
+        """
+        Same as above but multi-threaded.
+        """
 
+        os.makedirs(self.output_dir, exist_ok=True)
+        thread_files = []
+
+        for subdir, dirs, files in os.walk(self.input_dir):
+            for xml_doc in files:
+                if xml_doc[-3:] == 'xml':
+                    if xml_doc[:-9] in self.mapping:
+                        thread_files.append((xml_doc, subdir))
+
+        pool = Pool()
+        pool.starmap(self._parse_files, thread_files)
+        pool.close()
+        pool.join()

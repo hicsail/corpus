@@ -237,6 +237,7 @@ def add_bs_xml_content(text: str, f: Parsed, lang: str):
                 f.add_filtered_stemmed_sent(" ".join(s_filt_stem))
 
     text_list = clean_text(text)
+    f.add_content(text_list)
 
     stem = stem_text(text_list, lang)
     f.add_stemmed(stem)
