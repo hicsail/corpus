@@ -86,7 +86,7 @@ class DutchParser:
         obj.t = pub_info["title"]
         obj.y = pub_info["pub_date"]
 
-        with open("{0}/{1}".format(self.output_dir, doc[:-9]), 'w', encoding='utf-8') as out:
+        with open("{0}/{1}.json".format(self.output_dir, doc[:-9]), 'w', encoding='utf-8') as out:
             out.write(build_json(obj))
             out.close()
 

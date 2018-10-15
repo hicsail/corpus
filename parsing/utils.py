@@ -17,7 +17,6 @@ def fail(msg: str):
     os._exit(1)
 
 
-# TODO: ask user if they want to overwrite directory or add to it, if it exists
 def build_out(out_dir: str):
     """
     Build output directory, overwrite if it exists.
