@@ -7,12 +7,11 @@ from parsing.parsed import Parsed
 
 class DutchParser:
 
-    def __init__(self, input_dir, output_dir="/tmp/DM_parsed/", multi_thread=False):
+    def __init__(self, input_dir, output_dir="/tmp/DM_parsed/"):
 
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.mapping = self.map_files()
-        self.multi_thread = multi_thread
 
     @staticmethod
     def set_csv():
@@ -42,16 +41,22 @@ class DutchParser:
         """
 
         ret = {}
+        repeats = 0
 
         csv_data = self.set_csv()
 
         for f in csv_data:
             doc_id = f[0].strip("\"")
-            ret[doc_id] = {}
+            if doc_id in ret:
+                repeats += 1
+            else:
+                ret[doc_id] = {}
 
             ret[doc_id]["author"] = f[1]
             ret[doc_id]["title"] = f[2]
             ret[doc_id]["pub_date"] = f[3]
+
+        print(repeats)
 
         return ret
 
@@ -80,13 +85,13 @@ class DutchParser:
         obj = Parsed()
         self.get_text(tree, obj)
 
-        pub_info = self.mapping[doc[:-9]]
+        pub_info = self.mapping[doc[:-4]]
 
         obj.a = pub_info["author"]
         obj.t = pub_info["title"]
         obj.y = pub_info["pub_date"]
 
-        with open("{0}/{1}.json".format(self.output_dir, doc[:-9]), 'w', encoding='utf-8') as out:
+        with open("{0}/{1}.json".format(self.output_dir, doc[:-4]), 'w', encoding='utf-8') as out:
             out.write(build_json(obj))
             out.close()
 
@@ -102,7 +107,7 @@ class DutchParser:
         for subdir, dirs, files in os.walk(self.input_dir):
             for xml_doc in files:
                 if xml_doc[-3:] == 'xml':
-                    if xml_doc[:-9] in self.mapping:
+                    if xml_doc[:-4] in self.mapping:
                         self._parse_files(xml_doc, subdir)
 
     def parse_files_threaded(self):

@@ -18,6 +18,21 @@ class XcelToCsv:
 
         return wb.sheets()
 
+    @staticmethod
+    def filter_row(vals):
+
+        ret = []
+
+        for s in vals:
+            if isinstance(s, str):
+                ret.append(s.replace(",", ""))
+            elif isinstance(s, float):
+                ret.append(int(s))
+            else:
+                ret.append(s)
+
+        return ret
+
     def convert_and_write(self):
 
         sheets = self.load_sheets()
@@ -28,4 +43,4 @@ class XcelToCsv:
                 wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 
                 for j in range(s.nrows):
-                    wr.writerow(s.row_values(j)[:7])
+                    wr.writerow(self.filter_row(s.row_values(j)[:7]))
