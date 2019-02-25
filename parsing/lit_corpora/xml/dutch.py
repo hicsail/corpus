@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from parsing.utils import *
 from parsing.parsed import Parsed
 
+from pprint import pprint
+
 
 class DutchParser:
 
@@ -11,6 +13,7 @@ class DutchParser:
 
         self.input_dir = input_dir
         self.output_dir = output_dir
+        self.repeats = {}
         self.mapping = self.map_files()
 
     @staticmethod
@@ -35,20 +38,34 @@ class DutchParser:
 
         return ret
 
+    def add_repeat_rec(self, rec, current_mapping):
+
+        doc_id = rec[0].replace('"', '')
+
+        try:
+            self.repeats[doc_id].append(rec[1:])
+        except KeyError:
+            self.repeats[doc_id] = []
+            self.repeats[doc_id].append(rec[1:])
+
+            cur_rec = current_mapping[doc_id]
+            self.repeats[doc_id].append([cur_rec["author"], cur_rec["title"], cur_rec["pub_date"]])
+
+        return self
+
     def map_files(self):
         """
         Populate dict with publication info.
         """
 
         ret = {}
-        repeats = 0
 
         csv_data = self.set_csv()
 
         for f in csv_data:
             doc_id = f[0].strip("\"")
             if doc_id in ret:
-                repeats += 1
+                self.add_repeat_rec(f, ret)
             else:
                 ret[doc_id] = {}
 
@@ -56,9 +73,14 @@ class DutchParser:
             ret[doc_id]["title"] = f[2]
             ret[doc_id]["pub_date"] = f[3]
 
-        print(repeats)
-
         return ret
+
+    def log_repeats(self):
+
+        if self.mapping is None:
+            self.mapping = self.map_files()
+
+        pprint(self.repeats)
 
     @staticmethod
     def get_text(tree, obj):
