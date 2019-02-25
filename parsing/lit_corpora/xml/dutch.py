@@ -1,10 +1,11 @@
+import json
+
 from multiprocessing import Pool
 from bs4 import BeautifulSoup
+from pprint import pprint
 
 from parsing.utils import *
 from parsing.parsed import Parsed
-
-from pprint import pprint
 
 
 class DutchParser:
@@ -72,6 +73,7 @@ class DutchParser:
             ret[doc_id]["author"] = f[1]
             ret[doc_id]["title"] = f[2]
             ret[doc_id]["pub_date"] = f[3]
+            ret[doc_id]["present"] = False
 
         return ret
 
@@ -81,6 +83,23 @@ class DutchParser:
             self.mapping = self.map_files()
 
         pprint(self.repeats)
+
+    def identify_missing_volumes(self, output_dir="/tmp/missing.json"):
+
+        ret = {}
+
+        for subdir, dirs, files in os.walk(self.input_dir):
+            for xml_doc in files:
+                if xml_doc[-3:] == 'xml':
+                    if xml_doc[:-4] in self.mapping:
+                        self.mapping[xml_doc[:-4]]["present"] = True
+
+        for vol in self.mapping.keys():
+            if not self.mapping[vol]["present"]:
+                ret[vol] = self.mapping[vol]
+
+        with open(output_dir, 'w', encoding='utf-8') as out:
+            json.dump(ret, out, indent=4)
 
     @staticmethod
     def get_text(tree, obj):
