@@ -13,7 +13,7 @@ class Frequency:
     """
 
     def __init__(self, name: str, in_dir: str, text_type: str, year_list: list,
-                 keys: [list, None]=None, stop_words: [list, set, str, None] = None):
+                 keys: [list, None] = None, stop_words: [list, set, str, None] = None):
 
         self.name = name
         self.in_dir = in_dir
@@ -126,7 +126,10 @@ class Frequency:
         Update frequency lists with text from a volume.
         """
 
-        year = int(json_data["Date"])
+        try:
+            year = int(json_data["Date"])
+        except KeyError:
+            year = int(json_data["Year Published"])
 
         if self.year_list[0] <= year < self.year_list[-1]:
 

@@ -26,8 +26,8 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
-    def frequency(self, name: str, year_list: list, key_list: [list, None]=None,
-                  text_type: str='Text', stop_words: [list, set, str, None]=None):
+    def frequency(self, name: str, year_list: list, key_list: [list, None] = None,
+                  text_type: str = 'Text', stop_words: [list, set, str, None] = None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -43,7 +43,7 @@ class Corpus:
 
         return f
 
-    def tf_idf(self, name: str, year_list: list, text_type: str='Text', stop_words: [list, set, None]=None):
+    def tf_idf(self, name: str, year_list: list, text_type: str = 'Text', stop_words: [list, set, None] = None):
         """
         Find documents with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
@@ -58,7 +58,7 @@ class Corpus:
 
         return t
 
-    def raw_frequency(self, name: str,  key_list: list, text_type: str='Text', binary: bool=False):
+    def raw_frequency(self, name: str,  key_list: list, text_type: str = 'Text', binary: bool = False):
         """
         Build raw frequency tables for a corpus. Returned object is used for
         difference in proportions testing.
@@ -141,12 +141,9 @@ class Corpus:
         Build json object before writing to disk.
         """
 
-        jfile = json.dumps({'Title': title,
-                            'Author': author,
-                            'Keyword': keyword,
-                            'Year Published': year,
-                            'Text': text
-                            },
+        jfile = json.dumps({'0': {'Title': title, 'Author': author,
+                                  'Keyword': keyword, 'Year Published': year,
+                                  'Text': text}},
                            sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
 
         return jfile
@@ -202,19 +199,24 @@ class Corpus:
                 if jsondoc[0] != ".":
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
                         index += 1
-                        jsondata = json.load(in_file)
-                        year = int(jsondata["Date"])
-                        if y_min <= year <= y_max:
-                            title = jsondata["Title"]
-                            author = jsondata["Author"]
-                            text = list(nltk.ngrams(jsondata[text_type], self.detect_n(key_list)))
-                            for i in range(len(text)):
-                                if text[i] in set(key_list):
-                                    subindex += 1
-                                    out_text = text[(i - int(doc_size/2)):(i + int(doc_size/2))]
-                                    self._write_extract(
-                                        output_dir, key_list, year, index,
-                                        subindex, title, author, out_text
-                                    )
+                        jsonfile = json.load(in_file)
+                        for k in list(jsonfile.keys()):
+                            jsondata = jsonfile[k]
+                            try:
+                                year = int(jsondata["Date"])
+                            except KeyError:
+                                year = int(jsondata["Year Published"])
+                            if y_min <= year <= y_max:
+                                title = jsondata["Title"]
+                                author = jsondata["Author"]
+                                text = list(nltk.ngrams(jsondata[text_type], self.detect_n(key_list)))
+                                for i in range(len(text)):
+                                    if text[i] in set(key_list):
+                                        subindex += 1
+                                        out_text = text[(i - int(doc_size/2)):(i + int(doc_size/2))]
+                                        self._write_extract(
+                                            output_dir, key_list, year, index,
+                                            subindex, title, author, out_text
+                                        )
 
         return Corpus(name, output_dir)

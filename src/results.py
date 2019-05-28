@@ -75,7 +75,7 @@ class FrequencyResults(Results):
         jf['n'] = self.n
         jf['d'] = d
 
-        with open(out_path + '.json', 'w', encoding='utf-8') as j:
+        with open(out_path, 'w', encoding='utf-8') as j:
             j.write(self._build_json(jf))
 
     def write(self, out_path: str):

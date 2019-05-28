@@ -48,7 +48,10 @@ class Tfidf:
         Add data from a single volume to dictionary and corpora dicts.
         """
 
-        year = int(json_data[k]["Date"])
+        try:
+            year = int(json_data[k]["Date"])
+        except KeyError:
+            year = int(json_data[k]["Year Published"])
 
         if self.year_list[0] <= year < self.year_list[-1]:
             text = json_data[k][self.text_type]
@@ -165,7 +168,10 @@ class Tfidf:
         keyword within a corpus.
         """
 
-        year = int(json_data[k]["Date"])
+        try:
+            year = int(json_data[k]["Date"])
+        except KeyError:
+            year = int(json_data[k]["Year Published"])
 
         if self.year_list[0] <= year < self.year_list[-1]:
 
