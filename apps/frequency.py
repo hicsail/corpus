@@ -11,18 +11,19 @@ if __name__ == '__main__':
     e1 = c.frequency(
         'f1',
         [1800, 1820, 1840],
-        ['lady'],
+        ['economy'],
         'Filtered Text'
     )
 
-    e1.write_to_json('/Users/ben/Desktop/out')
+    freq1 = e1.take_freq()
+    freq1.write_to_json('/Users/ben/Desktop/out.json')
 
     e2 = c.frequency(
         'f2',
         [1800, 1820, 1840],
-        ['miss'],
+        ['education'],
         'Filtered Text'
-    )
+    ).take_freq()
 
     g = graph.GraphFrequency(['/Users/ben/Desktop/out.json', e2], colors=['black', 'grey']).create_plot().show()
 

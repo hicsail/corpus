@@ -11,10 +11,12 @@ if __name__ == '__main__':
     f = c.tf_idf(
         'freq',
         [1700, 1720, 1740],
-        'jonathan',
-        10,
-        'Filtered Text'
+        'Filtered Text',
     )
 
-    f.display()
+    tf_res = f.top_n('economy', 10)
+
+    tf_res.display()
+
+
 

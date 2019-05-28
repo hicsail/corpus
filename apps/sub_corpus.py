@@ -1,4 +1,4 @@
-from src import corpus
+from src import corpus, graph
 import sys
 
 if __name__ == '__main__':
@@ -11,8 +11,12 @@ if __name__ == '__main__':
     s = c.build_sub_corpus(
         'sub',
         sys.argv[2],
-        ['jonathan', 'lady'],
+        ['economy', 'education'],
         'Filtered Text',
-        40,
-        [1700, 1800]
+        30,
+        [1800, 1900]
     )
+
+    freq = s.frequency('f', [1800, 1820, 1840], ['education'], 'Text').take_freq()
+
+    g = graph.GraphFrequency([freq], colors=['black']).create_plot().show()
