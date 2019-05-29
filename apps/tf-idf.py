@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     f = c.tf_idf(
         'freq',
-        [1700, 1720, 1740],
+        [1800, 1820, 1840],
         'Filtered Text',
     )
 

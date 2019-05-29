@@ -30,5 +30,5 @@ if __name__ == '__main__':
     freq1 = e1.take_freq()
     freq2 = e2.take_freq()
 
-    g = graph.GraphFrequency([freq1, freq2], colors=['black', 'grey']).create_plot().show()
+    g = graph.GraphFrequency([freq1, freq2], colors=['black', 'orange']).create_plot().show()
 

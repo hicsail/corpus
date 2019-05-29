@@ -10,8 +10,9 @@ if __name__ == '__main__':
 
     t = c.lda_model(
         'lda',
-        [1700, 1720, 1740],
-        'Filtered Text'
-    ).write(
-        sys.argv[2]
+        [1800, 1820, 1840],
+        'Filtered Text',
+        30
     )
+
+    t.write(sys.argv[2], 30)
