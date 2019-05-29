@@ -17,6 +17,6 @@ if __name__ == '__main__':
         [1800, 1900]
     )
 
-    freq = s.frequency('f', [1800, 1820, 1840], ['education'], 'Text').take_freq()
+    freq = s.frequency('f', [1800, 1820, 1840], ['book'], 'Text').take_freq()
 
-    g = graph.GraphFrequency([freq], colors=['black']).create_plot().show()
+    g = graph.GraphFrequency([freq], colors=['orange']).create_plot().show()
