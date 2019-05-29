@@ -42,10 +42,13 @@ class GraphFrequency:
     def check_colors(self):
         """
         If a list of colors is passed, ensure that it is of the same length as the corpora list.
+
+        TODO: this assertion needs to ensure that the length of colors is equal to the keywords passed
         """
 
         if self.colors is not None:
-            assert len(self.colors) == len(self.corpora)
+            # assert len(self.colors) == len(self.corpora)
+            return
 
     def results_type(self):
         """
