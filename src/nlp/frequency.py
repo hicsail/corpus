@@ -12,17 +12,13 @@ class Frequency:
     use a consistent value of n within a particular list.
     """
 
-    def __init__(self, name: str, in_dir: str, text_type: str, year_list: list,
-                 keys: [list, None] = None, stop_words: [list, set, str, None] = None):
+    def __init__(self, name: str, in_dir: str, text_type: str,
+                 year_list: list, stop_words: [list, set, str, None] = None):
 
         self.name = name
         self.in_dir = in_dir
         self.text_type = text_type
         self.year_list = year_list
-        if keys is not None:
-            self.keys = keys
-        else:
-            self.keys = None
         if stop_words is not None:
             if isinstance(stop_words, str):
                 self.stop_words_from_json(stop_words)
@@ -105,16 +101,16 @@ class Frequency:
 
         return freq_dict
 
-    def detect_n(self):
+    def detect_n(self, keys):
         """
         Detect value of n for n-grams.
         """
 
-        if self.keys is None:
+        if keys is None:
             return 1
 
         lengths = set()
-        for k in self.keys:
+        for k in keys:
             lengths.add(len(k.split()))
 
         assert(len(lengths) == 1)
@@ -163,7 +159,7 @@ class Frequency:
 
         return self
 
-    def set_frequency_record(self):
+    def set_frequency_record(self, keys):
         """
         Calculate frequency distributions per period.
         """
@@ -172,10 +168,7 @@ class Frequency:
 
         print("Calculating frequency records.\n")
 
-        if self.keys is None:
-            n = 1
-        else:
-            n = self.detect_n()
+        n = self.detect_n(keys)
 
         for subdir, dirs, files in os.walk(self.in_dir):
             for json_doc in tqdm.tqdm(files):
@@ -196,24 +189,24 @@ class Frequency:
 
         self.frequency_record = self._clean_records(frequency_lists)
 
-    def take_freq(self):
+    def take_freq(self, keys, name):
         """
         Calculate keyword frequencies for each period from frequency records
         """
 
         if self.frequency_record is None:
-            self.set_frequency_record()
+            self.set_frequency_record(keys)
 
         num_docs = num_dict(self.year_list)
         freq = self.frequency_record
-        results = num_dict(self.year_list, self.keys, 1)
+        results = num_dict(self.year_list, keys, 1)
 
         for year in self.year_list[:-1]:
 
             if freq[year]['TOTAL_WORDS'] > 0:
 
                 total = 0
-                for k in self.keys:
+                for k in keys:
                     try:
                         total += freq[year]['FDIST'][k]
                         results[year][k] = freq[year]['FDIST'][k] / freq[year]['TOTAL_WORDS']
@@ -223,16 +216,16 @@ class Frequency:
                 num_docs[year] = freq[year]['NUM_DOCS']
                 results[year]['TOTAL'] = total / freq[year]['TOTAL_WORDS']
 
-        return FrequencyResults(results, num_docs, 'Global frequency (%)', self.name)
+        return FrequencyResults(results, num_docs, 'Global frequency (%)', name)
 
-    def _take_average_freq(self):
+    def _take_average_freq(self, keys):
         """
         Calculate average keyword frequency per document from frequency records.
         """
 
         num_docs = num_dict(self.year_list)
         freq = self.frequency_record
-        results = num_dict(self.year_list, self.keys, 1)
+        results = num_dict(self.year_list, keys, 1)
 
         for year in self.year_list[:-1]:
 
@@ -240,7 +233,7 @@ class Frequency:
 
                 total = 0
 
-                for k in self.keys:
+                for k in keys:
 
                     total += freq[year]['FDIST'][k]
                     results[year][k] = freq[year]['FDIST'][k] / freq[year]['NUM_DOCS']
@@ -250,15 +243,15 @@ class Frequency:
 
         return results, num_docs
 
-    def take_average_freq(self):
+    def take_average_freq(self, keys):
         """
         Calculate average keyword frequency per document from frequency records.
         """
 
         if self.frequency_record is None:
-            self.set_frequency_record()
+            self.set_frequency_record(keys)
 
-        results, num_docs = self._take_average_freq()
+        results, num_docs = self._take_average_freq(keys)
 
         return FrequencyResults(results, num_docs, 'Average frequency', self.name)
 

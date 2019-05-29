@@ -26,8 +26,8 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
-    def frequency(self, name: str, year_list: list, key_list: [list, None] = None,
-                  text_type: str = 'Text', stop_words: [list, set, str, None] = None):
+    def frequency(self, name: str, year_list: list, text_type: str = 'Text',
+                  stop_words: [list, set, str, None] = None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -37,7 +37,6 @@ class Corpus:
             self.in_dir,
             text_type,
             year_list,
-            key_list,
             stop_words
         )
 
