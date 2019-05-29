@@ -214,11 +214,13 @@ class Frequency:
 
                 total = 0
                 for k in self.keys:
+                    try:
+                        total += freq[year]['FDIST'][k]
+                        results[year][k] = freq[year]['FDIST'][k] / freq[year]['TOTAL_WORDS']
+                    except KeyError:
+                        pass
 
-                    total += freq[year]['FDIST'][k]
-                    results[year][k] = freq[year]['FDIST'][k] / freq[year]['TOTAL_WORDS']
-                    num_docs[year] = freq[year]['NUM_DOCS']
-
+                num_docs[year] = freq[year]['NUM_DOCS']
                 results[year]['TOTAL'] = total / freq[year]['TOTAL_WORDS']
 
         return FrequencyResults(results, num_docs, 'Global frequency (%)', self.name)
@@ -277,7 +279,7 @@ class Frequency:
 
         return keys
 
-    def top_n(self, num: int=10):
+    def top_n(self, num: int = 10):
         """
         Construct a dictionary that stores the top
         <num> words per period across a corpus.

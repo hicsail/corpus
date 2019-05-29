@@ -89,7 +89,7 @@ class Corpus:
 
         return t
 
-    def lda_model(self, name: str, year_list: list, text_type: str='Text',  num_topics: [int, None] = 10,
+    def lda_model(self, name: str, year_list: list, text_type: str = 'Text',  num_topics: [int, None] = 10,
                   passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None]=None):
         """
         Build LDA Topic Models for each period within a corpus.

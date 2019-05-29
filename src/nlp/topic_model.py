@@ -37,7 +37,10 @@ class TopicModel:
         Update dictionaries and corpora with results from a single volume.
         """
 
-        year = int(jsondata[k]["Date"])
+        try:
+            year = int(jsondata[k]["Date"])
+        except KeyError:
+            year = int(jsondata[k]["Year Published"])
 
         if self.year_list[0] <= year < self.year_list[-1]:
             text = jsondata[k][self.text_type]
@@ -123,7 +126,7 @@ class TopicModel:
                     LdaModel(corpus=self.corpora[year], id2word=self.word_to_id[year],
                              num_topics=num_topics, passes=passes, random_state=rand)
 
-        return TopicResults(results, self.num_docs)
+        return TopicResults(results, self.num_docs, self.name)
 
     def build_tf_idf_models(self):
         """
