@@ -9,7 +9,7 @@ class GraphFrequency:
     objects and produces a graph of them together.
     """
 
-    def __init__(self, corpora: list, title: str='Frequency Graph', colors: [list, None]=None):
+    def __init__(self, corpora: list, title: str = 'Frequency Graph', colors: [list, None] = None):
 
         self.corpora = corpora
         self.title = title
@@ -196,9 +196,9 @@ class GraphFrequency:
 
         return labels
 
-    def create_plot(self, x_label: str='Period', y_label: [str, None]=None,
-                    title: [str, None]=None, bar: bool=True, bar_width: int=5,
-                    leg_size: int=10, include_total=False):
+    def create_plot(self, x_label: str = 'Period', y_label: [str, None] = None,
+                    title: [str, None] = None, bar: bool = True, bar_width: int = 5,
+                    leg_size: int = 10, include_total: bool = False):
         """
         Generate graph of input data.
         """

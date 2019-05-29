@@ -341,8 +341,8 @@ class TopicResults(Results):
 
         return ", ".join(res)
 
-    def write(self, out_path: str, num_topics: int=10,
-              num_words: int=10, weights: bool=False):
+    def write(self, out_path: str, num_topics: int = 10,
+              num_words: int=10, weights: bool = False):
         """
         Write contents of LdaResults object to file.
         """
