@@ -251,13 +251,7 @@ class GraphFrequency:
             i = 0
             for f in self.graph_dict:
                 if total_only:
-                    # x_coord = index + (5 * i) + bar_width
-                    #
-                    # rects = ax1.bar(
-                    #     x_coord, self.graph_dict[f]["TOTAL"], bar_width, alpha=.8,
-                    #     color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
-                    #     label="{0}".format(f)
-                    # )
+
                     rects = self.construct_bars(ax1, bar_width, index, f, "TOTAL", i)
 
                     num_docs_record = list(self.num_docs[f])
@@ -271,13 +265,7 @@ class GraphFrequency:
                 else:
                     for k in self.graph_dict[f]:
                         if k != 'TOTAL':
-                            # x_coord = index + (5 * i) + bar_width
-                            #
-                            # rects = ax1.bar(
-                            #     x_coord, self.graph_dict[f][k], bar_width, alpha=.8,
-                            #     color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
-                            #     label="{0}: {1}".format(f, ' '.join(k) if isinstance(k, tuple) else k)
-                            # )
+
                             rects = self.construct_bars(ax1, bar_width, index, f, k, i)
 
                             num_docs_record = list(self.num_docs[f])
