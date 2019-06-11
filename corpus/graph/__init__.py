@@ -199,9 +199,21 @@ class GraphFrequency:
 
         return labels
 
+    def construct_bars(self, ax1, bar_width, index, record_name, keyword, i):
+
+        x_coord = index + (5 * i) + bar_width
+
+        rects = ax1.bar(
+            x_coord, self.graph_dict[record_name][keyword], bar_width, alpha=.8,
+            color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
+            label="{0}".format(record_name) if keyword == "TOTAL" else "{0}: {1}".format(record_name, keyword)
+        )
+
+        return rects
+
     def create_plot(self, x_label: str = 'Period', y_label: [str, None] = None,
                     title: [str, None] = None, bar: bool = True, bar_width: int = 5,
-                    leg_size: int = 10, include_total: bool = False):
+                    leg_size: int = 10, total_only: bool = False):
         """
         Generate graph of input data.
         """
@@ -237,36 +249,45 @@ class GraphFrequency:
 
         if bar:
             i = 0
-            colors_idx = 0
             for f in self.graph_dict:
-                for k in self.graph_dict[f]:
-                    if k == 'TOTAL' and not include_total:
-                        pass
-                    else:
-                        x_coord = index + (5 * i) + bar_width
+                if total_only:
+                    # x_coord = index + (5 * i) + bar_width
+                    #
+                    # rects = ax1.bar(
+                    #     x_coord, self.graph_dict[f]["TOTAL"], bar_width, alpha=.8,
+                    #     color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
+                    #     label="{0}".format(f)
+                    # )
+                    rects = self.construct_bars(ax1, bar_width, index, f, "TOTAL", i)
 
-                        if self.colors is None:
-                            rects = ax1.bar(
-                                x_coord, self.graph_dict[f][k],
-                                bar_width, alpha=.8,  color=np.random.rand(1, 3),
-                                label="{0}: {1}".format(f, ' '.join(k) if isinstance(k, tuple) else k)
-                            )
-                        else:
-                            rects = ax1.bar(
-                                x_coord, self.graph_dict[f][k],
-                                bar_width, alpha=.8,  color=self.colors[colors_idx],
-                                label="{0}: {1}".format(f, ' '.join(k) if isinstance(k, tuple) else k)
-                            )
-                            colors_idx += 1
+                    num_docs_record = list(self.num_docs[f])
 
-                        num_docs_record = list(self.num_docs[f])
+                    for j in range(len(rects)):
+                        h = rects[j].get_height()
+                        ax1.text(rects[j].get_x() + rects[j].get_width()/2., 1.05*h,
+                                 num_docs_record[j], ha='center', va='bottom')
 
-                        for j in range(len(rects)):
-                            h = rects[j].get_height()
-                            ax1.text(rects[j].get_x() + rects[j].get_width()/2., 1.05*h, num_docs_record[j],
-                                     ha='center', va='bottom')
+                    i += 1
+                else:
+                    for k in self.graph_dict[f]:
+                        if k != 'TOTAL':
+                            # x_coord = index + (5 * i) + bar_width
+                            #
+                            # rects = ax1.bar(
+                            #     x_coord, self.graph_dict[f][k], bar_width, alpha=.8,
+                            #     color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
+                            #     label="{0}: {1}".format(f, ' '.join(k) if isinstance(k, tuple) else k)
+                            # )
+                            rects = self.construct_bars(ax1, bar_width, index, f, k, i)
 
-                        i += 1
+                            num_docs_record = list(self.num_docs[f])
+
+                            for j in range(len(rects)):
+                                h = rects[j].get_height()
+                                ax1.text(rects[j].get_x() + rects[j].get_width()/2., 1.05*h,
+                                         num_docs_record[j], ha='center', va='bottom')
+
+                            i += 1
 
             ax1.axis(
                 [self.year_list[0], self.year_list[len(self.year_list) - 1], float(0), float(self.g_max)]
