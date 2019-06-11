@@ -321,3 +321,6 @@ uc1/pairtree_root/$b/13/66/56/$b136656
 umn/pairtree_root/31/95/10/01/08/31/85/4/319510010831854
 wu/pairtree_root/89/09/09/41/11/3/89090941113
 uc1/pairtree_root/$b/48/27/08/$b482708
+uc1/pairtree_root/b4/78/32/82/b4783282
+uc1/pairtree_root/$b/30/54/48/$b305448
+hvd/pairtree_root/hn/w1/l6/hnw1l6

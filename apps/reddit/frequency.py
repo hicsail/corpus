@@ -1,4 +1,4 @@
-from src import corpus
+from corpus import corpus
 import sys
 
 if __name__ == '__main__':

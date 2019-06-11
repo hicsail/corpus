@@ -1,7 +1,7 @@
 import re
 import json
 
-from src.utils import *
+from corpus.utils import *
 
 
 class Results:

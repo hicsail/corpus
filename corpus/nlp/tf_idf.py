@@ -3,7 +3,7 @@ import tqdm
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 
-from src.results import *
+from corpus.results import *
 
 
 class Tfidf:

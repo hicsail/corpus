@@ -3,8 +3,8 @@ import json
 import sys
 import nltk
 
-from src.nlp import frequency, tf_idf, topic_model, raw_frequency
-from src.utils import *
+from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency
+from corpus.utils import *
 
 
 class Corpus:

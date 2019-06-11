@@ -1,8 +1,8 @@
 import statsmodels.api
 import scipy.stats
 
-from src.utils import *
-from src.results import DiffPropResults
+from corpus.utils import *
+from corpus.results import DiffPropResults
 
 
 class DiffProportions:

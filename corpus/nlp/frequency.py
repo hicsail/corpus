@@ -1,7 +1,7 @@
 import tqdm
 import nltk
 
-from src.results import *
+from corpus.results import *
 
 
 class Frequency:

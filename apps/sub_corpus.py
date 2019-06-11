@@ -1,4 +1,4 @@
-from src import corpus, graph
+from corpus import corpus, graph
 import sys
 
 if __name__ == '__main__':

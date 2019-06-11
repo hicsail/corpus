@@ -1,6 +1,6 @@
 import sys
 
-from src import corpus
+from corpus import corpus
 
 
 if __name__ == '__main__':

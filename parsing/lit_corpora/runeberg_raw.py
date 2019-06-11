@@ -49,11 +49,6 @@ def parse_txt(in_dir, mappings, out_dir):
                 id_str = txt_f[:-4]
                 try:
                     maps = mappings[id_str]
-                    valid = True
-                except KeyError:
-                    valid = False
-
-                if valid:
 
                     obj.a = maps["AUTHOR"]
                     obj.t = maps["TITLE"]
@@ -66,6 +61,8 @@ def parse_txt(in_dir, mappings, out_dir):
                     with open(out_dir + txt_f[:-4] + '.json', 'w', encoding='utf-8') as out:
                         out.write(build_json(obj))
                         out.close()
+                except KeyError:
+                    pass
 
 
 if __name__ == '__main__':

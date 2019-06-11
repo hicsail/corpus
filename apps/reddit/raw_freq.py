@@ -1,5 +1,5 @@
-from src import corpus
-from src.diff_prop import DiffProportions
+from corpus import corpus
+from corpus.diff_prop import DiffProportions
 import sys
 
 if __name__ == '__main__':

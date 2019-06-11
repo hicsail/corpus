@@ -5,7 +5,7 @@ from gensim.models.lsimodel import LsiModel
 from numpy.random import RandomState
 from gensim.models import TfidfModel
 
-from src.results import *
+from corpus.results import *
 
 
 class TopicModel:
