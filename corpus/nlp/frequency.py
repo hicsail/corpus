@@ -12,30 +12,36 @@ class Frequency:
     use a consistent value of n within a particular list.
     """
 
-    def __init__(self, name: str, in_dir: str, text_type: str,
-                 year_list: list, date_key: str, stop_words: [list, set, str, None] = None):
+    def __init__(self, name: str, in_dir: str, text_type: str, year_list: list,
+                 date_key: str, stop_words: [list, set, str, None] = None):
 
         self.name = name
         self.in_dir = in_dir
         self.text_type = text_type
         self.year_list = year_list
         self.date_key = date_key
-        if stop_words is not None:
-            if isinstance(stop_words, str):
-                self.stop_words_from_json(stop_words)
-            elif isinstance(stop_words, list):
-                self.stop_words = set(stop_words)
-            else:
-                self.stop_words = stop_words
-        else:
-            self.stop_words = {}
+        self.stop_words = self.setup_stop_words(stop_words)
 
         self.frequency_record = None
+
+    def setup_stop_words(self, stop_words):
+
+        if stop_words is not None:
+            if isinstance(stop_words, str):
+                return self.stop_words_from_json(stop_words)
+            elif isinstance(stop_words, list):
+                return set(stop_words)
+            else:
+                return stop_words
+        else:
+            return {}
 
     def stop_words_from_json(self, file_path: str):
         """
         Set stop_words from Json file.
         """
+
+        print("Loading stop words from JSON file at {}".format(file_path))
 
         with open(file_path, 'r', encoding='utf8') as in_file:
 

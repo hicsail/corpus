@@ -27,6 +27,9 @@ class Corpus:
         return '{0} at {1}'.format(self.name, self.in_dir)
 
     def _debug_corpus_keys(self, json_doc):
+        """
+        Display keys from the JSON volumes in a corpus
+        """
 
         ret = []
 
@@ -46,6 +49,9 @@ class Corpus:
         return ret
 
     def debug_corpus_keys(self):
+        """
+        Display keys from the JSON volumes in a corpus
+        """
 
         ret_keys = set()
 
@@ -77,7 +83,8 @@ class Corpus:
 
         return f
 
-    def tf_idf(self, name: str, year_list: list, text_type: str = 'Text', stop_words: [list, set, None] = None):
+    def tf_idf(self, name: str, year_list: list, text_type: str = 'Text',
+               date_key: [None, str] = "Year Published", stop_words: [list, set, None] = None):
         """
         Find documents with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
@@ -87,6 +94,7 @@ class Corpus:
             self.in_dir,
             text_type,
             year_list,
+            date_key,
             stop_words
         )
 

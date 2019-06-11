@@ -15,35 +15,53 @@ class TopicModel:
     """
 
     def __init__(
-            self, name: str, in_dir: str, text_type: str,
-            year_list: list, stop_words: [list, set, None] = None):
+            self, name: str, in_dir: str, text_type: str, year_list: list,
+            date_key: str, stop_words: [list, set, None] = None):
 
         self.name = name
         self.in_dir = in_dir
         self.text_type = text_type
         self.year_list = year_list
-        if stop_words is not None:
-            self.stop_words = stop_words
-        else:
-            self.stop_words = {}
-
+        self.date_key = date_key
+        self.stop_words = self.setup_stop_words(stop_words)
         self.tf_idf_models = None
         self.word_to_id = None
         self.corpora = None
         self.num_docs = None
 
-    def _update_dictionaries_and_corpora(self, k, jsondata, word_to_id_results, corpora_results, numdocs):
+    def setup_stop_words(self, stop_words):
+
+        if stop_words is not None:
+            if isinstance(stop_words, str):
+                return self.stop_words_from_json(stop_words)
+            elif isinstance(stop_words, list):
+                return set(stop_words)
+            else:
+                return stop_words
+        else:
+            return {}
+
+    def stop_words_from_json(self, file_path: str):
+        """
+        Set stop_words from Json file.
+        """
+
+        print("Loading stop words from JSON file at {}".format(file_path))
+
+        with open(file_path, 'r', encoding='utf8') as in_file:
+
+            json_data = json.load(in_file)
+            self.stop_words = set(json_data['Words'])
+
+    def _update_dictionaries_and_corpora(self, k, json_data, word_to_id_results, corpora_results, numdocs):
         """
         Update dictionaries and corpora with results from a single volume.
         """
 
-        try:
-            year = int(jsondata[k]["Date"])
-        except KeyError:
-            year = int(jsondata[k]["Year Published"])
+        year = int(json_data[k][self.date_key])
 
         if self.year_list[0] <= year < self.year_list[-1]:
-            text = jsondata[k][self.text_type]
+            text = json_data[k][self.text_type]
 
             for i in range(len(text) - 1, -1, -1):
 
