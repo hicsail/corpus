@@ -200,14 +200,24 @@ class GraphFrequency:
         return labels
 
     def construct_bars(self, ax1, bar_width, index, record_name, keyword, i):
+        """
+        Construct bars corresponding to a given keyword.
+        """
 
         x_coord = index + (5 * i) + bar_width
-
-        rects = ax1.bar(
-            x_coord, self.graph_dict[record_name][keyword], bar_width, alpha=.8,
-            color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
-            label="{0}".format(record_name) if keyword == "TOTAL" else "{0}: {1}".format(record_name, keyword)
-        )
+        try:
+            rects = ax1.bar(
+                x_coord, self.graph_dict[record_name][keyword], bar_width, alpha=.8,
+                color=np.random.rand(1, 3) if self.colors is None else self.colors[i],
+                label="{0}".format(record_name) if keyword == "TOTAL" else "{0}: {1}".format(record_name, keyword)
+            )
+        except IndexError:
+            # colors were passed but not enough
+            rects = ax1.bar(
+                x_coord, self.graph_dict[record_name][keyword], bar_width, alpha=.8,
+                color=np.random.rand(1, 3),
+                label="{0}".format(record_name) if keyword == "TOTAL" else "{0}: {1}".format(record_name, keyword)
+            )
 
         return rects
 

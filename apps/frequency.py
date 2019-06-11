@@ -14,10 +14,10 @@ if __name__ == '__main__':
         'Filtered Text'
     )
 
-    freq1 = e1.take_freq(['state'], 'f1')
+    freq1 = e1.take_freq(['state', 'king'], 'f1')
     freq1.write_to_json(sys.argv[2])
 
-    freq2 = e1.take_freq(['education'], 'f2')
+    freq2 = e1.take_freq(['education', 'bills'], 'f2')
 
-    g = graph.GraphFrequency([sys.argv[2], freq2], colors=['black', 'orange']).create_plot(total_only=True).show()
+    g = graph.GraphFrequency([sys.argv[2], freq2], colors=["green"]).create_plot().show()
 
