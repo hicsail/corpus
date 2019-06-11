@@ -26,8 +26,42 @@ class Corpus:
 
         return '{0} at {1}'.format(self.name, self.in_dir)
 
+    def _debug_corpus_keys(self, json_doc):
+
+        ret = []
+
+        with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+
+            try:
+
+                json_data = json.load(in_file)
+                for k in list(json_data.keys()):
+                    for kk in json_data[k].keys():
+                        ret.append(kk)
+
+            except json.decoder.JSONDecodeError:
+
+                print("Error loading file {}".format(json_doc))
+
+        return ret
+
+    def debug_corpus_keys(self):
+
+        ret_keys = set()
+
+        for subdir, dirs, files in os.walk(self.in_dir):
+            for json_doc in tqdm.tqdm(files):
+                if json_doc[0] != ".":
+
+                    k = self._debug_corpus_keys(json_doc)
+                    for kk in k:
+                        ret_keys.add(kk)
+
+        for k in ret_keys:
+            print(k)
+
     def frequency(self, name: str, year_list: list, text_type: str = 'Text',
-                  stop_words: [list, set, str, None] = None):
+                  date_key: [None, str] = "Date", stop_words: [list, set, str, None] = None):
         """
         Measure keyword frequency as a percentage of total words across a corpus.
         """
@@ -37,6 +71,7 @@ class Corpus:
             self.in_dir,
             text_type,
             year_list,
+            date_key,
             stop_words
         )
 

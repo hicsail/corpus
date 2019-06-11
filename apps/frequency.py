@@ -10,8 +10,9 @@ if __name__ == '__main__':
 
     e1 = c.frequency(
         'f1',
-        [1800, 1820, 1840, 1860, 1880, 1900],
-        'Filtered Text'
+        [1800, 1820, 1830, 1860, 1880, 1900],
+        'Filtered Text',
+        'Year Published'
     )
 
     freq1 = e1.take_freq(['state', 'king'], 'f1')
@@ -19,5 +20,5 @@ if __name__ == '__main__':
 
     freq2 = e1.take_freq(['education', 'bills'], 'f2')
 
-    g = graph.GraphFrequency([sys.argv[2], freq2], colors=["green"]).create_plot().show()
+    g = graph.GraphFrequency([sys.argv[2], freq2], colors=["green"]).create_plot(total_only=True).show()
 

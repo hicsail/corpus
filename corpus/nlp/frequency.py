@@ -13,12 +13,13 @@ class Frequency:
     """
 
     def __init__(self, name: str, in_dir: str, text_type: str,
-                 year_list: list, stop_words: [list, set, str, None] = None):
+                 year_list: list, date_key: str, stop_words: [list, set, str, None] = None):
 
         self.name = name
         self.in_dir = in_dir
         self.text_type = text_type
         self.year_list = year_list
+        self.date_key = date_key
         if stop_words is not None:
             if isinstance(stop_words, str):
                 self.stop_words_from_json(stop_words)
@@ -123,9 +124,9 @@ class Frequency:
         """
 
         try:
-            year = int(json_data["Date"])
+            year = int(json_data[self.date_key])
         except KeyError:
-            year = int(json_data["Year Published"])
+            year = int(json_data[self.date_key])
 
         if self.year_list[0] <= year < self.year_list[-1]:
 
