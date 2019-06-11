@@ -108,7 +108,7 @@ class Corpus:
 
         return rf.take_frequencies()
 
-    def topic_model(self, name: str, year_list: list, text_type: str='Text', stop_words: [list, set, None]=None):
+    def topic_model(self, name: str, year_list: list, text_type: str = 'Text', stop_words: [list, set, None] = None):
         """
         Build generic Topic Model object, on which lda_model() or lsi_model() can be called.
         """
@@ -124,7 +124,7 @@ class Corpus:
         return t
 
     def lda_model(self, name: str, year_list: list, text_type: str = 'Text',  num_topics: [int, None] = 10,
-                  passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None]=None):
+                  passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None] = None):
         """
         Build LDA Topic Models for each period within a corpus.
         """
@@ -139,8 +139,8 @@ class Corpus:
 
         return t.lda_model(num_topics, passes, seed)
 
-    def lsi_model(self, name: str, year_list: list, text_type: str='Text', num_topics: [int, None] = 10,
-                  stochastic=False, stop_words: [list, set, None]=None):
+    def lsi_model(self, name: str, year_list: list, text_type: str = 'Text', num_topics: [int, None] = 10,
+                  stochastic=False, stop_words: [list, set, None] = None):
         """
         Build LSI Topic Models for each period within a corpus.
         """
@@ -201,8 +201,8 @@ class Corpus:
                 )
             )
 
-    def build_sub_corpus(self, name: str, output_dir: str, key_list: list, text_type: str='Text',
-                         doc_size: int=20, y_range: [list, None]=None):
+    def build_sub_corpus(self, name: str, output_dir: str, key_list: list, text_type: str = 'Text',
+                         date_key: [None, str] = "Year Published", doc_size: int = 20, y_range: [list, None] = None):
         """
         From a larger corpus, construct a sub-corpus containing
         only instances from a list of keywords, with a user-specified
@@ -236,10 +236,7 @@ class Corpus:
                         jsonfile = json.load(in_file)
                         for k in list(jsonfile.keys()):
                             jsondata = jsonfile[k]
-                            try:
-                                year = int(jsondata["Date"])
-                            except KeyError:
-                                year = int(jsondata["Year Published"])
+                            year = int(jsondata[date_key])
                             if y_min <= year <= y_max:
                                 title = jsondata["Title"]
                                 author = jsondata["Author"]
