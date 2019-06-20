@@ -170,7 +170,7 @@ class TfidfAuthor:
         print("Building TF-IDF author models.\n")
 
         for author in tqdm.tqdm(self.author_list):
-            results[author] = TfidfModel(self.corpora[author], dictionary=self.word_to_id[author])
+            results[author] = TfidfModel(self.corpora[author], dictionary=self.word_to_id[author], smartirs='ntc')
 
         self.tf_idf_author_models = results
 

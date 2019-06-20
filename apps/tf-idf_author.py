@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     model = c.tf_idf_author(
         'tfidf',
-        'Filtered Sentences',
+        'Filtered Text',
     )
 
     model.build_dictionaries_and_corpora()
@@ -21,8 +21,14 @@ if __name__ == '__main__':
     cooperation_words = "agreement arbitration bargaining coalition collaboration compromise cooperation coordination negotiation pact settlement unanimity unity"
     cooperation_list = cooperation_words.split()
 
-    for w in cooperation_list:
-        #TODO: map words to id?
-        for author in model.author_list:
-            model.word_to_id[author].token2id
+    # for w in cooperation_list:
+    #     #TODO: map words to id?
+    #     for author in model.author_list:
+    #         model.word_to_id[author].token2id
 
+    # Create the TF-IDF model
+    tfidf = models.TfidfModel(corpus, smartirs='ntc')
+
+    # Show the TF-IDF weights
+    for doc in tfidf[corpus]:
+        print([[mydict[id], np.around(freq, decimals=2)] for id, freq in doc])
