@@ -22,23 +22,24 @@ def build_keys(keys: list):
     return [tuple(k.split()) for k in keys]
 
 
-def num_dict(year_list: list, keywords: [list, None]=None, nested: [int, None]=0):
+def num_dict(alist: list, keywords: [list, None]=None, nested: [int, None]=0):
     """
     Build empty dictionary with integers at leaf entries.
+    alist: year_list or author_list
     """
 
     results = {}
 
-    for year in year_list:
+    for item in alist:
 
         if nested == 0:
-            results[year] = 0
+            results[item] = 0
 
         elif nested == 1:
-            results[year] = {}
-            results[year]['TOTAL'] = 0
+            results[item] = {}
+            results[item]['TOTAL'] = 0
             for keyword in keywords:
-                results[year][keyword] = 0
+                results[item][keyword] = 0
 
         else:
             _fail('Shouldn\'t be able to get here.')
@@ -46,23 +47,24 @@ def num_dict(year_list: list, keywords: [list, None]=None, nested: [int, None]=0
     return results
 
 
-def list_dict(year_list: list, keywords: [list, None]=None, nested: [None, int]=0):
+def list_dict(alist: list, keywords: [list, None]=None, nested: [None, int]=0):
     """
     Build empty dictionary with lists at leaf entries.
+    alist: year_list or author_list
     """
 
     results = {}
 
-    for year in year_list:
+    for item in alist:
 
         if nested == 0:
-            results[year] = []
+            results[item] = []
 
         elif nested == 1:
-            results[year] = {}
+            results[item] = {}
             for keyword in keywords:
-                results[year]['TOTAL'] = []
-                results[year][keyword] = []
+                results[item]['TOTAL'] = []
+                results[item][keyword] = []
 
         else:
             _fail('Shouldn\'t be able to get here.')
@@ -70,15 +72,16 @@ def list_dict(year_list: list, keywords: [list, None]=None, nested: [None, int]=
     return results
 
 
-def gensim_dict(year_list: list):
+def gensim_dict(alist: list):
     """
     Build empty dictionary with gensim Dictionary objects at leaf entries.
+    alist: year_list or author_list
     """
 
     results = {}
 
-    for year in year_list:
-        results[year] = corpora.Dictionary()
+    for item in alist:
+        results[item] = corpora.Dictionary()
 
     return results
 

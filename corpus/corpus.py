@@ -3,7 +3,7 @@ import json
 import sys
 import nltk
 
-from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency
+from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency, tf_idf_author
 from corpus.utils import *
 
 
@@ -95,6 +95,22 @@ class Corpus:
             text_type,
             year_list,
             date_key,
+            stop_words
+        )
+
+        return t
+
+    def tf_idf_author(self, name: str, text_type: str = 'Text',
+                      author_key: [None, str] = "Author", stop_words: [list, set, None] = None):
+        """
+        Find author with highest TF-IDF scores w/r/t a keyword within a corpus.
+        """
+
+        t = tf_idf_author.TfidfAuthor(
+            name,
+            self.in_dir,
+            text_type,
+            author_key,
             stop_words
         )
 
