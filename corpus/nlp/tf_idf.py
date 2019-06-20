@@ -206,7 +206,7 @@ class Tfidf:
 
         return top_results
 
-    def top_n(self, keyword: str, n: int=10):
+    def top_n(self, keyword: str, n: int = 10):
         """
         Iterates over the corpus and computes TF-IDF scores for each document,
         with respect to the precomputed TF-IDF models. Extracts results for a

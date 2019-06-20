@@ -23,7 +23,8 @@ class TfidfAuthor:
         self.stop_words = self.setup_stop_words(stop_words)
 
         self.author_list = None
-        self.tf_idf_author_models = None
+        # self.tf_idf_author_models = None
+        self.tf_idf_model = None
         self.word_to_id = None
         self.corpora = None
 
@@ -86,8 +87,10 @@ class TfidfAuthor:
             return
 
         self._generate_author_list()
-        word_to_id_results = gensim_dict(self.author_list)
-        corpora_results = list_dict(self.author_list)
+        # word_to_id_results = gensim_dict(self.author_list)
+        word_to_id = corpora.Dictionary()
+        # corpora_results = list_dict(self.author_list)
+        corpora_results = []
 
         print("Building word to ID mappings.\n")
 
@@ -106,15 +109,18 @@ class TfidfAuthor:
                                     if text[i] in self.stop_words:
                                         del text[i]
                                 if len(text) > 0:
-                                    word_to_id_results[target].add_documents([text])
-                                    d2b = word_to_id_results[target].doc2bow(text)
-                                    corpora_results[target].append(d2b)
+                                    # word_to_id_results[target].add_documents([text])
+                                    # d2b = word_to_id_results[target].doc2bow(text)
+                                    # corpora_results[target].append(d2b)
+                                    word_to_id.add_documents([text])
+                                    d2b = word_to_id.doc2bow(text)
+                                    corpora_results.append(d2b)
 
                         except json.decoder.JSONDecodeError:
 
                             print("Error loading file {}".format(jsondoc))
 
-        self.word_to_id = word_to_id_results
+        self.word_to_id = word_to_id
         self.corpora = corpora_results
 
         return self

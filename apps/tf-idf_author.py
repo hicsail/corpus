@@ -13,8 +13,8 @@ if __name__ == '__main__':
         'Filtered Text',
     )
 
-    model.build_dictionaries_and_corpora()
-    model.save_models("/Users/Even/Desktop/tfidf_author_out")
+    # model.build_dictionaries_and_corpora()
+    #model.save_models("/Users/Even/Desktop/tfidf_author_out")
 
     res = model.build_tf_idf_author_models()
 
@@ -27,8 +27,8 @@ if __name__ == '__main__':
     #         model.word_to_id[author].token2id
 
     # Create the TF-IDF model
-    tfidf = models.TfidfModel(corpus, smartirs='ntc')
-
-    # Show the TF-IDF weights
-    for doc in tfidf[corpus]:
-        print([[mydict[id], np.around(freq, decimals=2)] for id, freq in doc])
+    # tfidf = models.TfidfModel(corpus, smartirs='ntc')
+    #
+    # # Show the TF-IDF weights
+    # for doc in tfidf[corpus]:
+    #     print([[mydict[id], np.around(freq, decimals=2)] for id, freq in doc])
