@@ -1,7 +1,9 @@
 from corpus import corpus
-import sys
+import sys, pandas
 
 if __name__ == '__main__':
+
+    author_dict = corpus.doc2author(sys.argv[1], sys.argv[2], "Filtered Text")
 
     c = corpus.Corpus(
         'test',
@@ -10,25 +12,21 @@ if __name__ == '__main__':
 
     model = c.tf_idf_author(
         'tfidf',
-        'Filtered Text',
+        author_dict,
     )
 
-    # model.build_dictionaries_and_corpora()
-    #model.save_models("/Users/Even/Desktop/tfidf_author_out")
+    model.build_tf_idf_author_model()
 
-    res = model.build_tf_idf_author_models()
+    result = dict()
+    # word = "agreement"
+    # result[word] = model.get_word_score(word)
 
     cooperation_words = "agreement arbitration bargaining coalition collaboration compromise cooperation coordination negotiation pact settlement unanimity unity"
     cooperation_list = cooperation_words.split()
 
-    # for w in cooperation_list:
-    #     #TODO: map words to id?
-    #     for author in model.author_list:
-    #         model.word_to_id[author].token2id
+    for w in cooperation_list[:3]:
+        result[w] = model.get_word_score(w)
 
-    # Create the TF-IDF model
-    # tfidf = models.TfidfModel(corpus, smartirs='ntc')
-    #
-    # # Show the TF-IDF weights
-    # for doc in tfidf[corpus]:
-    #     print([[mydict[id], np.around(freq, decimals=2)] for id, freq in doc])
+    df = pandas.DataFrame(result, index=list(author_dict.keys()))
+
+    df.head()

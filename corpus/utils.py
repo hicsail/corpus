@@ -1,5 +1,8 @@
 import os
 import shutil
+import json
+import tqdm
+import re
 
 from nltk.stem.snowball import SnowballStemmer
 from gensim import corpora
@@ -131,8 +134,41 @@ def build_out(out_dir: str):
         _fail("Please specify output directory.")
 
 
+def doc2author(in_dir: str, out_dir: str, text_type: str):
+    """
+    create a dictionary <key=author, value=text>
+    """
+    print("\nGenerating author dictionary.\n")
+    author_dict = dict()
+    outfile = out_dir + "/british_small_author_dict.json"
+    exists = os.path.isfile(outfile)
+    if exists:
+        with open(outfile, 'r') as fp:
+            author_dict = json.load(fp)
+    else:
+        for subdir, dirs, files in os.walk(in_dir):
+            for jsondoc in tqdm.tqdm(files):
+                if jsondoc[0] != ".":
+                    with open(in_dir + "/" + jsondoc, 'r', encoding='utf8') as infile:
+                        try:
+                            json_data = json.load(infile)
+                            for k in json_data.keys():
+                                author_raw = (json_data[k]["Author"]).lower()
+                                author = re.sub(r'\W+', '_', author_raw)
+                                text = json_data[k][text_type]
+                                # stopwords are not excluded, since we are working on tf-idf
+                                author_dict[author] = []
+                                author_dict[author].extend(text)
+                                # if author in author_dict:
+                                #     author_dict[author].extend(text)
+                                # else:
+                                #     author_dict[author] = text
+                        except json.decoder.JSONDecodeError:
+                            print("Error loading file {}".format(jsondoc))
+        with open(outfile, 'w') as fp:
+            json.dump(author_dict, fp, sort_keys=True, indent=4)
 
-
+    return author_dict
 
 
 
