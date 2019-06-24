@@ -22,6 +22,8 @@ class TfidfAuthor:
         self.word_to_id = None
         self.corpora = None
 
+        self.scores_author = None
+
     def setup_stop_words(self, stop_words):
 
         if stop_words is not None:
@@ -87,10 +89,10 @@ class TfidfAuthor:
             self.build_dictionaries_and_corpora()
 
         if self.tf_idf_model is None:
-            self.build_tf_idf_author_models()
+            self.build_tf_idf_author_model()
 
         build_out(out_dir)
-        os.mkdir("{0}/{1}".format(out_dir, 'tfidf_author'))
+        os.mkdir("{0}/{1}".format(out_dir, 'tfidf_authors'))
         os.mkdir("{0}/{1}".format(out_dir, 'dictionaries'))
 
         model = self.tf_idf_model
@@ -124,23 +126,55 @@ class TfidfAuthor:
 
         return self
 
-    def get_word_score(self, word: str):
+    # def get_word_score(self, word: str):
+    #
+    #     word_score_author = []
+    #     word_id = self.word_to_id.token2id.get(word)
+    #
+    #     if word_id is None:
+    #         print("\nATTENTION: word {0} not used by any author".format(word))
+    #
+    #     else:
+    #         # Show the TF-IDF weights
+    #         for doc in self.corpora:
+    #             used = False
+    #             tfidf = self.tf_idf_model[doc]
+    #             for wid, s in tfidf:
+    #                 if wid == word_id:
+    #                     used = True
+    #                     word_score_author.append(s)
+    #             if used == False:
+    #                 word_score_author.append(0)
+    #     return word_score_author
 
-        word_score_author = []
-        word_id = self.word_to_id.token2id.get(word)
+    def get_all_word_scores(self):
+        '''
+        return a dict:
+        {
+            "author1": {
+                "w1": <score>,
+                "w2", <score>,
+                ...
+            },
+            "author2": {
+                "w1": <score>,
+                "w2", <score>,
+                ...
+            }
+         }
+        '''
 
-        if word_id is None:
-            print("\nATTENTION: word {0} not used by any author".format(word))
+        word_score_author = dict()
 
-        else:
-            # Show the TF-IDF weights
-            for doc in self.corpora:
-                used = False
-                tfidf = self.tf_idf_model[doc]
-                for wid, s in tfidf:
-                    if wid == word_id:
-                        used = True
-                        word_score_author.append(s)
-                if used == False:
-                    word_score_author.append(0)
-        return word_score_author
+        for author, text in self.author_dict.items():
+
+            word_score_author[author] = dict()
+
+            d2b = self.word_to_id.doc2bow(text)
+            tfidf = self.tf_idf_model[d2b]
+            for wid, s in tfidf:
+                word = self.word_to_id.get(wid)
+                word_score_author[author][word] = s
+
+        self.scores_author = word_score_author
+        return self
