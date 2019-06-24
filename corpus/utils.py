@@ -140,7 +140,9 @@ def doc2author(in_dir: str, out_dir: str, text_type: str):
     """
     print("\nGenerating author dictionary.\n")
     author_dict = dict()
-    outfile = out_dir + "/british_small_author_dict.json"
+
+    filename = in_dir.split("/")[-1]
+    outfile = out_dir + "/" + filename + "_author_dict.json"
     exists = os.path.isfile(outfile)
     if exists:
         with open(outfile, 'r') as fp:

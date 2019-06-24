@@ -24,7 +24,7 @@ if __name__ == '__main__':
     cooperation_words = "agreement arbitration bargaining coalition collaboration compromise cooperation coordination negotiation pact settlement unanimity unity"
     cooperation_list = cooperation_words.split()
 
-    for w in cooperation_list[:3]:
+    for w in cooperation_list:
         result[w] = model.get_word_score(w)
 
     df = pandas.DataFrame(result, index=list(author_dict.keys()))
