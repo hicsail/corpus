@@ -1,5 +1,3 @@
-import tqdm
-import re
 import numpy as np
 
 from gensim.models import TfidfModel
@@ -128,7 +126,7 @@ class TfidfAuthor:
 
     def get_word_score(self, word: str):
 
-        word_freq_author = []
+        word_score_author = []
         word_id = self.word_to_id.token2id.get(word)
 
         if word_id is None:
@@ -136,17 +134,13 @@ class TfidfAuthor:
 
         else:
             # Show the TF-IDF weights
-            # TODO:
-            #  assuming the doc in self.corpra are in the SAME order as the authors in author_dict
-            #  (set len matches)
             for doc in self.corpora:
                 used = False
-                for wid, freq in doc:
+                tfidf = self.tf_idf_model[doc]
+                for wid, s in tfidf:
                     if wid == word_id:
                         used = True
-                        #TODO: score is tf
-                        score = np.around(freq, decimals=2)
-                        word_freq_author.append(score)
+                        word_score_author.append(s)
                 if used == False:
-                    word_freq_author.append(0)
-        return word_freq_author
+                    word_score_author.append(0)
+        return word_score_author

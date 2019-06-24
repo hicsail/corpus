@@ -29,4 +29,7 @@ if __name__ == '__main__':
 
     df = pandas.DataFrame(result, index=list(author_dict.keys()))
 
-    df.head()
+    tfidf_result = sys.argv[2] + '/tfidf_result.csv'
+
+    df.to_csv(tfidf_result, encoding='utf-8')
+
