@@ -3,7 +3,7 @@ import sys, csv, pandas
 
 if __name__ == '__main__':
 
-    author_dict = corpus.doc2author(sys.argv[1], sys.argv[2], "Filtered Text")
+    # author_dict = corpus.doc2author(sys.argv[1], sys.argv[2], "Filtered Text")
 
     c = corpus.Corpus(
         'test',

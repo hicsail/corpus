@@ -12,10 +12,10 @@ class TfidfAuthor:
     """
 
     def __init__(
-            self, name: str, author_dict: dict, stop_words: [list, set, None] = None):
+            self, name: str, author_dict_path: str, stop_words: [list, set, None] = None):
 
         self.name = name
-        self.author_dict = author_dict
+        self.author_dict = self._get_author_dict_from_json(author_dict_path)
         self.stop_words = self.setup_stop_words(stop_words)
 
         self.tf_idf_model = None
@@ -44,11 +44,52 @@ class TfidfAuthor:
         print("Loading stop words from JSON file at {}".format(file_path))
 
         with open(file_path, 'r', encoding='utf8') as in_file:
-
             json_data = json.load(in_file)
-            stop_words = set(json_data['Words'])
 
-            return stop_words
+        stop_words = set(json_data['Words'])
+        return stop_words
+
+    def _get_author_dict_from_json(self, file_path: str):
+        """
+        Set author_dict from Json file.
+        """
+        print("Loading author_dict from JSON file at {}".format(file_path))
+        exists = os.path.isfile(file_path)
+        if exists:
+            with open(file_path, 'r', encoding='utf8') as fp:
+                self.author_dict = json.load(fp)
+        else:
+            #self.generating_author_dict()
+            print("\nAuthor dict not found, please use XXX to generate author_dict")
+
+        return self
+
+    def generating_author_dict(self, in_dir: str, text_type: str, out_dir: [str, None] = None):
+        author_dict = dict()
+        for subdir, dirs, files in os.walk(in_dir):
+            for jsondoc in tqdm.tqdm(files):
+                if jsondoc[0] != ".":
+                    with open(in_dir + "/" + jsondoc, 'r', encoding='utf8') as infile:
+                        try:
+                            json_data = json.load(infile)
+                            for k in json_data.keys():
+                                author_raw = (json_data[k]["Author"]).lower()
+                                author = re.sub(r'\W+', '_', author_raw)
+                                text = json_data[k][text_type]
+                                author_dict[author] = []
+                                author_dict[author].extend(text)
+
+                        except json.decoder.JSONDecodeError:
+                            print("Error loading file {}".format(jsondoc))
+
+        if out_dir is not None: # save the dict
+            filename = in_dir.split("/")[-1]
+            outfile = out_dir + "/" + filename + "_author_dict.json"
+            with open(outfile, 'w') as fp:
+                json.dump(author_dict, fp, sort_keys=True, indent=4)
+
+        self.author_dict = author_dict
+        return self
 
     def build_dictionaries_and_corpora(self):
         """
