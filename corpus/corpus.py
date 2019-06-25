@@ -100,14 +100,14 @@ class Corpus:
 
         return t
 
-    def tf_idf_author(self, name: str, author_dict: dict):
+    def tf_idf_author(self, name: str):
         """
         Find author with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
 
         t = tf_idf_author.TfidfAuthor(
             name,
-            author_dict,
+            self.in_dir
         )
 
         return t

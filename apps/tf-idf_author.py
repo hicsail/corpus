@@ -12,9 +12,9 @@ if __name__ == '__main__':
 
     model = c.tf_idf_author(
         'tfidf',
-        author_dict,
     )
 
+    model.get_author_dict_from_json('/Users/ben/Desktop/british-corpus_author_dict.json')
     model.build_tf_idf_author_model()
 
     model.get_all_word_scores()

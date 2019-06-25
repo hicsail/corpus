@@ -5,6 +5,7 @@ from gensim.corpora import Dictionary
 
 from corpus.results import *
 
+
 class TfidfAuthor:
     """
     Data structure for identifying authors(instead of documents) and their corresponding TF-IDF
@@ -12,12 +13,13 @@ class TfidfAuthor:
     """
 
     def __init__(
-            self, name: str, author_dict_path: str, stop_words: [list, set, None] = None):
+            self, name: str, in_dir: str, stop_words: [list, set, None] = None):
 
         self.name = name
-        self.author_dict = self._get_author_dict_from_json(author_dict_path)
+        self.in_dir = in_dir
         self.stop_words = self.setup_stop_words(stop_words)
 
+        self.author_dict = None
         self.tf_idf_model = None
         self.word_to_id = None
         self.corpora = None
@@ -49,27 +51,27 @@ class TfidfAuthor:
         stop_words = set(json_data['Words'])
         return stop_words
 
-    def _get_author_dict_from_json(self, file_path: str):
+    def get_author_dict_from_json(self, file_path: str):
         """
         Set author_dict from Json file.
         """
+
         print("Loading author_dict from JSON file at {}".format(file_path))
         exists = os.path.isfile(file_path)
         if exists:
             with open(file_path, 'r', encoding='utf8') as fp:
                 self.author_dict = json.load(fp)
         else:
-            #self.generating_author_dict()
             print("\nAuthor dict not found, please use XXX to generate author_dict")
 
         return self
 
-    def generating_author_dict(self, in_dir: str, text_type: str, out_dir: [str, None] = None):
+    def generating_author_dict(self, text_type: str, out_dir: [str, None] = None):
         author_dict = dict()
-        for subdir, dirs, files in os.walk(in_dir):
+        for subdir, dirs, files in os.walk(self.in_dir):
             for jsondoc in tqdm.tqdm(files):
                 if jsondoc[0] != ".":
-                    with open(in_dir + "/" + jsondoc, 'r', encoding='utf8') as infile:
+                    with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as infile:
                         try:
                             json_data = json.load(infile)
                             for k in json_data.keys():
@@ -82,14 +84,24 @@ class TfidfAuthor:
                         except json.decoder.JSONDecodeError:
                             print("Error loading file {}".format(jsondoc))
 
-        if out_dir is not None: # save the dict
-            filename = in_dir.split("/")[-1]
-            outfile = out_dir + "/" + filename + "_author_dict.json"
-            with open(outfile, 'w') as fp:
-                json.dump(author_dict, fp, sort_keys=True, indent=4)
+        # if out_dir is not None: # save the dict
+        #     filename = in_dir.split("/")[-1]
+        #     outfile = out_dir + "/" + filename + "_author_dict.json"
+        #     with open(outfile, 'w') as fp:
+        #         json.dump(author_dict, fp, sort_keys=True, indent=4)
 
         self.author_dict = author_dict
         return self
+
+    def write_author_dict(self, file_path):
+        '''
+        write author_dict
+        '''
+
+        if self.author_dict is None:
+            self.generating_author_dict()
+
+        # write stuff
 
     def build_dictionaries_and_corpora(self):
         """
