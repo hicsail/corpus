@@ -1,9 +1,7 @@
 from corpus import corpus
-import sys, csv, pandas
+import sys, csv
 
 if __name__ == '__main__':
-
-    # author_dict = corpus.doc2author(sys.argv[1], sys.argv[2], "Filtered Text")
 
     c = corpus.Corpus(
         'test',
@@ -14,20 +12,19 @@ if __name__ == '__main__':
         'tfidf',
     )
 
-    model.get_author_dict_from_json('/Users/ben/Desktop/british-corpus_author_dict.json')
+    model.get_author_dict_from_json('/Users/Even/Desktop/SAIL/NLP-POL/british_small_author_dict.json')
     model.build_tf_idf_author_model()
 
     model.get_all_word_scores()
     # model.save_model(sys.argv[2])
 
-    # result = dict()
-    # result[word] = model.get_word_score(word)
-
-    cooperation_words = "agreement arbitration bargaining coalition collaboration compromise cooperation coordination negotiation pact settlement unanimity unity"
+    cooperation_words = "agreement arbitration bargaining coalition collaboration compromise cooperation coordination \
+                        negotiation pact settlement unanimity unity"
     cooperation_list = cooperation_words.split()
     cooperation_list.insert(0, 'author_keywords')
-    #print(cooperation_list)
+    # print(cooperation_list)
 
+    # write the author-words tfidf score matrix to file
     tfidf_result = sys.argv[2] + '/tfidf_result.csv'
     with open(tfidf_result, 'w') as csvFile:
         writer = csv.writer(csvFile)

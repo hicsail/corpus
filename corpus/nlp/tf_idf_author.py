@@ -2,7 +2,6 @@ import numpy as np
 
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
-
 from corpus.results import *
 
 
@@ -62,11 +61,12 @@ class TfidfAuthor:
             with open(file_path, 'r', encoding='utf8') as fp:
                 self.author_dict = json.load(fp)
         else:
-            print("\nAuthor dict not found, please use XXX to generate author_dict")
+            print("\nAuthor dict not found, please use 'generating_author_dict' to generate author_dict, \
+            \nor use 'write_author_dict_to_file' if you want ot save it")
 
         return self
 
-    def generating_author_dict(self, text_type: str, out_dir: [str, None] = None):
+    def generating_author_dict(self, text_type: str):
         author_dict = dict()
         for subdir, dirs, files in os.walk(self.in_dir):
             for jsondoc in tqdm.tqdm(files):
@@ -84,24 +84,20 @@ class TfidfAuthor:
                         except json.decoder.JSONDecodeError:
                             print("Error loading file {}".format(jsondoc))
 
-        # if out_dir is not None: # save the dict
-        #     filename = in_dir.split("/")[-1]
-        #     outfile = out_dir + "/" + filename + "_author_dict.json"
-        #     with open(outfile, 'w') as fp:
-        #         json.dump(author_dict, fp, sort_keys=True, indent=4)
-
         self.author_dict = author_dict
         return self
 
-    def write_author_dict(self, file_path):
+    def write_author_dict_to_file(self, text_type: str, outfile: str):
         '''
-        write author_dict
+        write author_dict to a json file
         '''
 
+        print("Writing author_dict ot file")
         if self.author_dict is None:
-            self.generating_author_dict()
+            self.author_dict = self.generating_author_dict(text_type)
 
-        # write stuff
+        with open(outfile, 'w') as fp:
+            json.dump(self.author_dict, fp, sort_keys=True, indent=4)
 
     def build_dictionaries_and_corpora(self):
         """
@@ -127,6 +123,8 @@ class TfidfAuthor:
                 word_to_id.add_documents([text])
                 d2b = word_to_id.doc2bow(text)
                 corpora_results.append(d2b)
+
+        # corpora_results = [word_to_id.doc2bow(text) for _, text in self.author_dict.items()]
 
         self.word_to_id = word_to_id
         self.corpora = corpora_results
@@ -206,28 +204,28 @@ class TfidfAuthor:
         {
             "author1": {
                 "w1": <score>,
-                "w2", <score>,
+                "w2": <score>,
                 ...
             },
             "author2": {
                 "w1": <score>,
-                "w2", <score>,
+                "w2": <score>,
                 ...
             }
          }
         '''
 
-        word_score_author = dict()
+        author_all_words = dict()
 
         for author, text in self.author_dict.items():
 
-            word_score_author[author] = dict()
+            author_all_words[author] = dict()
 
             d2b = self.word_to_id.doc2bow(text)
             tfidf = self.tf_idf_model[d2b]
             for wid, s in tfidf:
                 word = self.word_to_id.get(wid)
-                word_score_author[author][word] = s
+                author_all_words[author][word] = s
 
-        self.scores_author = word_score_author
+        self.scores_author = author_all_words
         return self
