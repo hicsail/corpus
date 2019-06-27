@@ -12,7 +12,8 @@ if __name__ == '__main__':
         'tfidf',
     )
 
-    model.get_author_dict_from_json('/Users/Even/Desktop/SAIL/NLP-POL/british_small_author_dict.json')
+    # model.get_author_dict_from_json('/Users/ben/Desktop/british_author_dict.json')
+    model.generating_author_dict('Filtered Text')
     model.build_tf_idf_author_model()
 
     model.get_all_word_scores()

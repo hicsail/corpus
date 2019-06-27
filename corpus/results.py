@@ -13,7 +13,6 @@ class Results:
 
         self.d = d
         self.n = n
-        self.years = [y[0] for y in self.d.items()]
 
 
 class FrequencyResults(Results):
@@ -27,6 +26,7 @@ class FrequencyResults(Results):
 
         self.name = name
         self.f_type = f_type
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -152,6 +152,7 @@ class TopResults(Results):
         super(TopResults, self).__init__(d, n)
 
         self.name = name
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -221,6 +222,7 @@ class TfidfResults(Results):
 
         self.keyword = keyword
         self.name = name
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -293,6 +295,7 @@ class TopicResults(Results):
         super(TopicResults, self).__init__(d, n)
 
         self.name = name
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -446,3 +449,11 @@ class DiffPropResults:
                     "Critical: {0}\n"
                     .format(str(self.d['Critical']))
                 )
+
+
+class TfidfAuthorResults:
+
+    def __init__(self, author_dict: dict, name: str):
+
+        self.author_dict = author_dict
+        self.name = name
