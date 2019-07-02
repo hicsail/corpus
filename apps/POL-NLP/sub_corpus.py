@@ -11,7 +11,7 @@ def setup_parser():
     parser.add_argument("-o", action="store", help="output directory")
     parser.add_argument("-k", action="store", help="keywords")
     parser.add_argument("-l", action="store", help="number of words to extract per snippet")
-    parser.add_argument("-t", action="store", help="text field to analyze")
+    parser.add_argument("-t", action="store", help="text field to analyze", default="Filtered")
 
     return parser.parse_args()
 

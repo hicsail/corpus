@@ -131,8 +131,9 @@ class Corpus:
 
         return t
 
-    def lda_model(self, name: str, year_list: list, text_type: str = 'Text',  num_topics: [int, None] = 10,
-                  passes: [int, None] = 1, seed: [int, None] = None, stop_words: [list, set, None] = None):
+    def lda_model(self, name: str, year_list: list, text_type: str = 'Text',  date_key:str = "Date",
+                  num_topics: [int, None] = 10, passes: [int, None] = 1, seed: [int, None] = None,
+                  stop_words: [list, set, str, None] = None):
         """
         Build LDA Topic Models for each period within a corpus.
         """
@@ -142,6 +143,7 @@ class Corpus:
             self.in_dir,
             text_type,
             year_list,
+            date_key,
             stop_words
         )
 
@@ -158,6 +160,7 @@ class Corpus:
             self.in_dir,
             text_type,
             year_list,
+
             stop_words
         )
 
@@ -184,7 +187,7 @@ class Corpus:
         """
 
         jfile = json.dumps({'0': {'Title': title, 'Author': author,
-                                  'Keyword': keyword, 'Year Published': year,
+                                  'Keyword': keyword, 'Date': year,
                                   'Text': text}},
                            sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
 

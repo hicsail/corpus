@@ -10,7 +10,7 @@ def setup_parser():
     parser.add_argument("-i", action="store", help="input directory")
     parser.add_argument("-o", action="store", help="output file path")
     parser.add_argument("-k", action="store", help="keywords")
-    parser.add_argument("-t", action="store", help="text field to analyze")
+    parser.add_argument("-t", action="store", help="text field to analyze", default="Text")
     parser.add_argument("-y", action="store", help="year ranges")
     parser.add_argument("-n", action="store", help="frequency record name")
 
