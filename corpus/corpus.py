@@ -84,7 +84,7 @@ class Corpus:
         return f
 
     def tf_idf(self, name: str, year_list: list, text_type: str = 'Text',
-               date_key: [None, str] = "Year Published", stop_words: [list, set, None] = None):
+               date_key: [None, str] = "Date", stop_words: [list, set, None] = None):
         """
         Find documents with highest TF-IDF scores w/r/t a keyword within a corpus.
         """
