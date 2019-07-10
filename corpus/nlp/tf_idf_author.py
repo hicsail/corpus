@@ -2,6 +2,15 @@ import numpy as np
 
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
+from sklearn import manifold
+from sklearn.cluster import KMeans
+
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
+import scipy.spatial.distance as ssd
+from scipy.spatial.distance import pdist
+
+from kneed import KneeLocator
+
 from corpus.results import *
 
 
@@ -23,7 +32,11 @@ class TfidfAuthor:
         self.word_to_id = None
         self.corpora = None
 
-        self.scores_author = None
+        self.author_word_score_dict = None
+
+        self.tsne = None
+        self.kmeans = None
+        self.hclustering = None
 
     def setup_stop_words(self, stop_words):
 
@@ -55,7 +68,7 @@ class TfidfAuthor:
         Set author_dict from Json file.
         """
 
-        print("Loading author_dict from JSON file at {}".format(file_path))
+        print("Loading author_dict from JSON file at {}\n".format(file_path))
         exists = os.path.isfile(file_path)
         if exists:
             with open(file_path, 'r', encoding='utf8') as fp:
@@ -92,7 +105,7 @@ class TfidfAuthor:
         write author_dict to a json file
         '''
 
-        print("Writing author_dict ot file")
+        print("\nWriting author_dict to csv file... might take a while...\n")
         if self.author_dict is None:
             self.author_dict = self.generating_author_dict(text_type)
 
@@ -173,59 +186,108 @@ class TfidfAuthor:
 
         print("Building TF-IDF author models.\n")
 
-        self.tf_idf_model = TfidfModel(self.corpora, dictionary=self.word_to_id, smartirs='ntc')
+        self.tf_idf_model = TfidfModel(self.corpora, dictionary=self.word_to_id, smartirs='ltc')
 
         return self
 
-    # def get_word_score(self, word: str):
-    #
-    #     word_score_author = []
-    #     word_id = self.word_to_id.token2id.get(word)
-    #
-    #     if word_id is None:
-    #         print("\nATTENTION: word {0} not used by any author".format(word))
-    #
-    #     else:
-    #         # Show the TF-IDF weights
-    #         for doc in self.corpora:
-    #             used = False
-    #             tfidf = self.tf_idf_model[doc]
-    #             for wid, s in tfidf:
-    #                 if wid == word_id:
-    #                     used = True
-    #                     word_score_author.append(s)
-    #             if used == False:
-    #                 word_score_author.append(0)
-    #     return word_score_author
-
     def get_all_word_scores(self):
-        '''
-        return a dict:
-        {
-            "author1": {
-                "w1": <score>,
-                "w2": <score>,
-                ...
-            },
-            "author2": {
-                "w1": <score>,
-                "w2": <score>,
-                ...
-            }
-         }
-        '''
+        """
 
-        author_all_words = dict()
+        :return: a dictionary
+            {
+                "author1": { "w1": <score>, "w2": <score>, ... },
+                "author2": { "w1": <score>, "w2": <score>, ... },
+                ...
+             }
+        """
+
+        author_word_score_dict = dict()
 
         for author, text in self.author_dict.items():
 
-            author_all_words[author] = dict()
+            author_word_score_dict[author] = dict()
 
             d2b = self.word_to_id.doc2bow(text)
             tfidf = self.tf_idf_model[d2b]
             for wid, s in tfidf:
                 word = self.word_to_id.get(wid)
-                author_all_words[author][word] = s
+                author_word_score_dict[author][word] = s
 
-        self.scores_author = author_all_words
+        self.author_word_score_dict = author_word_score_dict
         return self
+
+    def _get_author_keywords_score_matrix(self, keywords: list):
+        """
+        :param keywords: a list of key words
+        :return: a 2D array, each row is a author and each column is a word
+        """
+        full_mat = []
+        for a, words in self.author_word_score_dict.items():
+            scores_per_author = []
+            for w in keywords:
+                s = words.get(w)
+                if s is None:
+                    s = 0
+                scores_per_author.append(s)
+            full_mat.append(scores_per_author)
+
+        return full_mat
+
+    def _get_author_keywords_score_matrix_nonzero(self, keywords: list):
+        """
+        exclude the authors who did not use any words in the keywords list
+        """
+        full_mat = self._get_author_keywords_score_matrix(keywords)
+        # check length
+        assert len(self.author_dict.keys()) == len(full_mat)
+
+        nonzero_index = [i for i in range(len(full_mat)) if np.count_nonzero(full_mat[i]) != 0]
+        # nonzero_authors = [[*self.author_dict][i] for i in nonzero_index]
+        nonzero_mat = [full_mat[i] for i in nonzero_index]
+        nonzero_authors, zero_authors = [], []
+        for i, author in enumerate([*self.author_dict]):
+            target = nonzero_authors if i in nonzero_index else zero_authors
+            target.append(author)
+
+        return zero_authors, nonzero_authors, nonzero_mat
+
+    ##################################################################################################
+    #        t-SNE
+    ##################################################################################################
+
+    def compute_tsne_nonzero(self, keywords: list):
+        print("Computing t-SNE embedding on NON-zero authors")
+        zauthors, nzauthors, nzmat = self._get_author_keywords_score_matrix_nonzero(keywords)
+        tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
+        X_tsne = tsne.fit_transform(nzmat)
+
+        return TfidfAuthorResults2D(X_tsne)
+
+    ##################################################################################################
+    #        Clustering Methods
+    ##################################################################################################
+
+    def cluster_kmeans(self, keywords: list):
+        zauthors, authors, mat = self._get_author_keywords_score_matrix_nonzero(keywords)
+
+        print("Evaluating clusters for best number K for K-means")
+        maxK = int(len(mat) / 4)
+        Ks = [i for i in range(1, maxK)]
+        errors = np.zeros(maxK-1)
+        for k in tqdm.tqdm(Ks):
+            temp_kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
+            temp_kmeans.fit_predict(mat)
+            errors[k - 1] = temp_kmeans.inertia_
+
+        kn = KneeLocator(Ks, errors, curve='convex', direction='decreasing')
+        n = kn.knee
+
+        print("Kmeans Clustering on K = ", n)
+        kmeans = KMeans(n_clusters=n)
+        kmeans.fit(mat)
+
+        labels = kmeans.predict(mat)
+
+        # return authors, mat, labels
+        return TfidfAuthorClusters(authors, mat, labels, zauthors)
+

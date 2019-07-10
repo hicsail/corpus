@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 
 class GraphFrequency:
@@ -329,3 +331,50 @@ class GraphFrequency:
                   "Please use one of the following: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz")
 
 
+class GraphClusters:
+    """
+    visualize clustering results after applying dimension reduction to 2D
+    """
+
+    def __init__(self, data_2d: np.ndarray, title: str = 'Clustering Result', cluster_labels: [list, None] = None):
+        self.data_2d = data_2d
+        self.title = title
+        self.cluster_labels = cluster_labels
+
+        self.plt = None
+
+    def generate_colormap_and_show_plot(self):
+        """
+        generate a colormap according to the clustering result and plot
+        """
+
+        N = len(set(self.cluster_labels))
+        # define the colormap
+        cmap = plt.cm.jet
+        # extract all colors from the .jet map
+        cmaplist = [cmap(i) for i in range(cmap.N)]
+        # create the new map
+        cmap = cmap.from_list('Custom cmap', cmaplist, cmap.N)
+        # define the bins and normalize
+        bounds = np.linspace(0, N, N + 1)
+        norm = colors.BoundaryNorm(bounds, cmap.N)
+
+        # setup the plot
+        fig, ax = plt.subplots(1, 1, figsize=(6, 6))
+        scat = ax.scatter(self.data_2d[:, 0], self.data_2d[:, 1], c=self.cluster_labels, cmap=cmap, norm=norm)
+        # create the colorbar
+        cb = plt.colorbar(scat, spacing='proportional', ticks=bounds)
+        cb.set_label('Custom cbar')
+        ax.set_title(self.title)
+        plt.show()
+
+    def save(self, out_path: str):
+        """
+        Save graph to file
+        """
+
+        try:
+            self.plt.savefig(out_path)
+        except ValueError:
+            print("Unsupported file format. \n"
+                  "Please use one of the following: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz")

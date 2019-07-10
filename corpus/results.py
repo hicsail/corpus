@@ -1,6 +1,8 @@
 import re
 import json
-
+import csv
+import numpy as np
+from collections import defaultdict, OrderedDict
 from corpus.utils import *
 
 
@@ -451,9 +453,46 @@ class DiffPropResults:
                 )
 
 
-class TfidfAuthorResults:
+class TfidfAuthorResults2D:
 
-    def __init__(self, author_dict: dict, name: str):
+    def __init__(self, authors: list, author_keywords_score_mat: np.ndarray):
 
-        self.author_dict = author_dict
-        self.name = name
+        self.authors = authors
+        self.author_keywords_score_mat = author_keywords_score_mat
+
+        assert len(authors) == len(author_keywords_score_mat)
+
+
+class TfidfAuthorClusters(TfidfAuthorResults2D):
+    """
+    clustering results
+    """
+    def __init__(self, authors: list, author_keywords_score_mat: np.ndarray, cluster_labels: list, zero_authors: list):
+        super(TfidfAuthorClusters, self).__init__(authors, author_keywords_score_mat)
+        self.cluster_labels = cluster_labels
+        self.zero_authors = zero_authors
+
+        assert len(authors) == len(cluster_labels)
+
+    def _cluster_authors(self):
+        clustered_authors_dict = defaultdict(list)
+        for k, v in zip(self.cluster_labels, self.authors):
+            clustered_authors_dict[k].append(v)
+        return clustered_authors_dict
+
+    #TODO: may add some stats later
+    def write_authors_clustered(self, out_path: str, name: str):
+        """
+        :param out_path: the output file
+        :param name: name of the clustering method
+        """
+        # n_clusters = set(self.cluster_labels)
+        # clustered_authors_list = sorted(self._cluster_authors().items()) # returns a list of tuples
+        clustered_authors_dict = OrderedDict(sorted(self._cluster_authors().items()))
+
+        with open(out_path + '.txt', 'w') as t:
+            print("Writing results to text file.")
+            t.write("Clustered by {0}\n".format(name))
+            t.write("Authors not used any key words:\n\t{0}\n".format(self.zero_authors))
+            for key, val in clustered_authors_dict.items():
+                t.write("Group {0}:\n\t{1}\n".format(key, val))
