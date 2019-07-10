@@ -181,7 +181,7 @@ class Frequency:
             for json_doc in tqdm.tqdm(files):
                 if json_doc[0] != ".":
 
-                    with open(self.in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
+                    with open(os.path.join(self.in_dir, json_doc), 'r', encoding='utf8') as in_file:
 
                         try:
 

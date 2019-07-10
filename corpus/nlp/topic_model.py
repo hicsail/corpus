@@ -16,7 +16,7 @@ class TopicModel:
 
     def __init__(
             self, name: str, in_dir: str, text_type: str, year_list: list,
-            date_key: str, stop_words: [list, set, None] = None):
+            date_key: str, stop_words: [list, set, str, None] = None):
 
         self.name = name
         self.in_dir = in_dir
