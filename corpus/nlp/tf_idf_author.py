@@ -233,6 +233,10 @@ class TfidfAuthor:
 
         return full_mat
 
+    def write_full_mat_csv(self, keywords:list):
+        full_mat = self._get_author_keywords_score_matrix(keywords)
+        return TfidfAuthorResultMat([*self.author_dict], full_mat, keywords)
+
     def _get_author_keywords_score_matrix_nonzero(self, keywords: list):
         """
         exclude the authors who did not use any words in the keywords list
@@ -261,12 +265,12 @@ class TfidfAuthor:
         tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
         X_tsne = tsne.fit_transform(nzmat)
 
-        return TfidfAuthorResults2D(X_tsne)
+        return TfidfAuthorResultMat(X_tsne)
 
     ##################################################################################################
     #        Clustering Methods
     ##################################################################################################
-
+    #TODO: also give the user a control on choosing k?
     def cluster_kmeans(self, keywords: list):
         zauthors, authors, mat = self._get_author_keywords_score_matrix_nonzero(keywords)
 
@@ -291,3 +295,9 @@ class TfidfAuthor:
         # return authors, mat, labels
         return TfidfAuthorClusters(authors, mat, labels, zauthors)
 
+    #TODO how do I choose cutoff value?
+    def cluster_hcluster_ward(self, keywords: list):
+        zauthors, authors, mat = self._get_author_keywords_score_matrix_nonzero(keywords)
+
+        Z = linkage(mat, method='ward')
+        cluster_labels_hiearchial = fcluster(Z, 0.05, 'distance')

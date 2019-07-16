@@ -1,6 +1,7 @@
 import re
 import json
 import csv
+import pandas as pd
 import numpy as np
 from collections import defaultdict, OrderedDict
 from corpus.utils import *
@@ -453,17 +454,24 @@ class DiffPropResults:
                 )
 
 
-class TfidfAuthorResults2D:
-
-    def __init__(self, authors: list, author_keywords_score_mat: np.ndarray):
-
+class TfidfAuthorResultMat:
+    """
+    the score matrix, either full mat or non_zero mat
+    """
+    def __init__(self, authors: list, author_keywords_score_mat: np.ndarray, keywords: list):
         self.authors = authors
         self.author_keywords_score_mat = author_keywords_score_mat
+        self.keywords = keywords
 
         assert len(authors) == len(author_keywords_score_mat)
+        assert len(keywords) == len(author_keywords_score_mat[0])
+
+    def write_csv(self, out_path: str):
+        df = pd.DataFrame(data=self.author_keywords_score_mat, columns=self.keywords, index=self.authors)
+        df.to_csv(out_path)
 
 
-class TfidfAuthorClusters(TfidfAuthorResults2D):
+class TfidfAuthorClusters(TfidfAuthorResultMat):
     """
     clustering results
     """
