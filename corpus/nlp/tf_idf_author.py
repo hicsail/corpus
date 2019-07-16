@@ -6,8 +6,8 @@ from sklearn import manifold
 from sklearn.cluster import KMeans
 
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
-import scipy.spatial.distance as ssd
-from scipy.spatial.distance import pdist
+import matplotlib.pyplot as plt
+
 
 from kneed import KneeLocator
 
@@ -21,10 +21,11 @@ class TfidfAuthor:
     """
 
     def __init__(
-            self, name: str, in_dir: str, stop_words: [list, set, None] = None):
+            self, name: str, in_dir: str, out_dir: str, stop_words: [list, set, None] = None):
 
         self.name = name
         self.in_dir = in_dir
+        self.out_dir = out_dir
         self.stop_words = self.setup_stop_words(stop_words)
 
         self.author_dict = None
@@ -33,10 +34,6 @@ class TfidfAuthor:
         self.corpora = None
 
         self.author_word_score_dict = None
-
-        self.tsne = None
-        self.kmeans = None
-        self.hclustering = None
 
     def setup_stop_words(self, stop_words):
 
@@ -79,7 +76,7 @@ class TfidfAuthor:
 
         return self
 
-    def generating_author_dict(self, text_type: str):
+    def generating_author_dict(self, text_type: str, save: bool=True):
         author_dict = dict()
         for subdir, dirs, files in os.walk(self.in_dir):
             for jsondoc in tqdm.tqdm(files):
@@ -98,19 +95,14 @@ class TfidfAuthor:
                             print("Error loading file {}".format(jsondoc))
 
         self.author_dict = author_dict
+
+        if save:
+            print("\nWriting author_dict to csv file... might take a while...\n")
+            outfile = self.out_dir + "/author_dict.json"
+            with open(outfile, 'w') as fp:
+                json.dump(self.author_dict, fp, sort_keys=True, indent=4)
+
         return self
-
-    def write_author_dict_to_file(self, text_type: str, outfile: str):
-        '''
-        write author_dict to a json file
-        '''
-
-        print("\nWriting author_dict to csv file... might take a while...\n")
-        if self.author_dict is None:
-            self.author_dict = self.generating_author_dict(text_type)
-
-        with open(outfile, 'w') as fp:
-            json.dump(self.author_dict, fp, sort_keys=True, indent=4)
 
     def build_dictionaries_and_corpora(self):
         """
@@ -216,7 +208,7 @@ class TfidfAuthor:
         self.author_word_score_dict = author_word_score_dict
         return self
 
-    def _get_author_keywords_score_matrix(self, keywords: list):
+    def get_author_keywords_score_matrix(self, keywords: list):
         """
         :param keywords: a list of key words
         :return: a 2D array, each row is a author and each column is a word
@@ -231,73 +223,100 @@ class TfidfAuthor:
                 scores_per_author.append(s)
             full_mat.append(scores_per_author)
 
-        return full_mat
+        return AuthorKeywordsMat(full_mat, [*self.author_dict], keywords)
 
-    def write_full_mat_csv(self, keywords:list):
-        full_mat = self._get_author_keywords_score_matrix(keywords)
-        return TfidfAuthorResultMat([*self.author_dict], full_mat, keywords)
 
-    def _get_author_keywords_score_matrix_nonzero(self, keywords: list):
-        """
-        exclude the authors who did not use any words in the keywords list
-        """
-        full_mat = self._get_author_keywords_score_matrix(keywords)
-        # check length
-        assert len(self.author_dict.keys()) == len(full_mat)
+class AuthorKeywordsMat:
+    """
+    takes in the full matrix of author-keywords tfidf scores
+    """
 
-        nonzero_index = [i for i in range(len(full_mat)) if np.count_nonzero(full_mat[i]) != 0]
-        # nonzero_authors = [[*self.author_dict][i] for i in nonzero_index]
-        nonzero_mat = [full_mat[i] for i in nonzero_index]
-        nonzero_authors, zero_authors = [], []
-        for i, author in enumerate([*self.author_dict]):
-            target = nonzero_authors if i in nonzero_index else zero_authors
-            target.append(author)
+    def __init__(self, mat, row_index: list, col_index: list):
 
-        return zero_authors, nonzero_authors, nonzero_mat
+        assert len(row_index) == len(mat)
+        assert len(col_index) == len(mat[0])
+
+        self.mat = mat
+        self.row_index = row_index  # authors
+        self.col_index = col_index  # keywords
+
+        self.nonzero_authors = None  # only for authors who used at least one keyword
+        self.nonzero_mat = None
+
+        self.tsne = None
+        self.kmeans = None
+        self.hclustering = None
+
+    def write_mat_csv(self):
+        return TfidfAuthorResultMat(self.mat, self.row_index, self.col_index)
+
+    def _get_nonzero_mat(self):
+
+        nonzero_index = [i for i in range(len(self.mat)) if np.count_nonzero(self.mat[i]) != 0]
+        self.nonzero_authors = [self.row_index[i] for i in nonzero_index]
+        self.nonzero_mat = [self.mat[i] for i in nonzero_index]
+
+        return self
+
+    def _get_zero_authors(self):
+
+        zero_authors = list(set(self.row_index) - set(self.nonzero_authors))
+        assert len(zero_authors) + len(self.nonzero_authors) == len(self.row_index)
+
+        return zero_authors
 
     ##################################################################################################
     #        t-SNE
+    #        authors not using any keywords are excluded
     ##################################################################################################
 
-    def compute_tsne_nonzero(self, keywords: list):
-        print("Computing t-SNE embedding on NON-zero authors")
-        zauthors, nzauthors, nzmat = self._get_author_keywords_score_matrix_nonzero(keywords)
-        tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
-        X_tsne = tsne.fit_transform(nzmat)
+    def compute_tsne(self):
 
-        return TfidfAuthorResultMat(X_tsne)
+        print("Computing t-SNE embedding on NON-zero authors")
+        tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
+        mat_tsne = tsne.fit_transform(self.nonzero_mat)
+
+        return TfidfAuthorResultMat(mat_tsne)
 
     ##################################################################################################
     #        Clustering Methods
+    #        authors not using any keywords are excluded
     ##################################################################################################
-    #TODO: also give the user a control on choosing k?
-    def cluster_kmeans(self, keywords: list):
-        zauthors, authors, mat = self._get_author_keywords_score_matrix_nonzero(keywords)
 
-        print("Evaluating clusters for best number K for K-means")
-        maxK = int(len(mat) / 4)
-        Ks = [i for i in range(1, maxK)]
-        errors = np.zeros(maxK-1)
-        for k in tqdm.tqdm(Ks):
-            temp_kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
-            temp_kmeans.fit_predict(mat)
-            errors[k - 1] = temp_kmeans.inertia_
+    def cluster_kmeans(self, n: [int, None]=None):
 
-        kn = KneeLocator(Ks, errors, curve='convex', direction='decreasing')
-        n = kn.knee
+        if n is None:
+            print("You did not specify a cluster number.\nLet me try to find one for you.")
+            maxK = int(len(self.nonzero_mat) / 4)
+            Ks = [i for i in range(1, maxK)]
+            errors = np.zeros(maxK-1)
+            for k in tqdm.tqdm(Ks):
+                temp_kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
+                temp_kmeans.fit_predict(self.nonzero_mat)
+                errors[k - 1] = temp_kmeans.inertia_
+
+            kn = KneeLocator(Ks, errors, curve='convex', direction='decreasing')
+            n = kn.knee
 
         print("Kmeans Clustering on K = ", n)
         kmeans = KMeans(n_clusters=n)
-        kmeans.fit(mat)
+        kmeans.fit(self.nonzero_mat)
 
-        labels = kmeans.predict(mat)
+        labels = kmeans.predict(self.nonzero_mat)
+        zauthors = self._get_zero_authors()
 
-        # return authors, mat, labels
-        return TfidfAuthorClusters(authors, mat, labels, zauthors)
+        # return authors, mat, labels and authors_not_using_keywords
+        return TfidfAuthorClusters(self.nonzero_authors, self.nonzero_mat, labels, zauthors)
 
-    #TODO how do I choose cutoff value?
-    def cluster_hcluster_ward(self, keywords: list):
-        zauthors, authors, mat = self._get_author_keywords_score_matrix_nonzero(keywords)
+    def plot_dendrogram(self, cutoff,  method: [str, None]=None):
 
-        Z = linkage(mat, method='ward')
+        if method is None:
+            method = 'ward'
+        Z = linkage(self.nonzero_mat, method=method)
+        fig = plt.figure(figsize=(25, 10))
+        dn = dendrogram(Z, orientation='left', color_threshold=0.5*max(Z[:,2]), no_labels=True)
+        plt.show()
+
+    def cluster_hcluster(self, keywords: list, method: [str, None]=None):
+
         cluster_labels_hiearchial = fcluster(Z, 0.05, 'distance')

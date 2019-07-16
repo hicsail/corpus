@@ -458,9 +458,10 @@ class TfidfAuthorResultMat:
     """
     the score matrix, either full mat or non_zero mat
     """
-    def __init__(self, authors: list, author_keywords_score_mat: np.ndarray, keywords: list):
-        self.authors = authors
+    def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list):
+
         self.author_keywords_score_mat = author_keywords_score_mat
+        self.authors = authors
         self.keywords = keywords
 
         assert len(authors) == len(author_keywords_score_mat)
