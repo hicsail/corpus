@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 from kneed import KneeLocator
 
@@ -232,6 +232,12 @@ class AuthorKeywordsMat:
     """
 
     def __init__(self, mat, row_index: list, col_index: list):
+        """
+
+        :param mat:
+        :param row_index: authors
+        :param col_index: the keywords list
+        """
 
         assert len(row_index) == len(mat)
         assert len(col_index) == len(mat[0])
@@ -240,15 +246,18 @@ class AuthorKeywordsMat:
         self.row_index = row_index  # authors
         self.col_index = col_index  # keywords
 
-        self.nonzero_authors = None  # only for authors who used at least one keyword
         self.nonzero_mat = None
+        self.nonzero_authors = None  # only for authors who used at least one keyword
+        self._get_nonzero_mat()
 
         self.tsne = None
-        self.kmeans = None
-        self.hclustering = None
+        # self.kmeans = None
+        # self.hclustering = None
 
-    def write_mat_csv(self):
-        return TfidfAuthorResultMat(self.mat, self.row_index, self.col_index)
+
+    def write_full_mat(self, outfile: str):
+        df = pd.DataFrame(data=self.mat, columns=self.col_index, index=self.row_index)
+        df.to_csv(outfile)
 
     def _get_nonzero_mat(self):
 
@@ -276,11 +285,15 @@ class AuthorKeywordsMat:
         tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
         mat_tsne = tsne.fit_transform(self.nonzero_mat)
 
-        return TfidfAuthorResultMat(mat_tsne)
+        self.tsne = mat_tsne
+        # TODO: plot?
+        return self
 
     ##################################################################################################
     #        Clustering Methods
     #        authors not using any keywords are excluded
+    ##################################################################################################
+    #        K-Means
     ##################################################################################################
 
     def cluster_kmeans(self, n: [int, None]=None):
@@ -302,21 +315,29 @@ class AuthorKeywordsMat:
         kmeans = KMeans(n_clusters=n)
         kmeans.fit(self.nonzero_mat)
 
-        labels = kmeans.predict(self.nonzero_mat)
+        cluster_labels = kmeans.predict(self.nonzero_mat)
         zauthors = self._get_zero_authors()
 
         # return authors, mat, labels and authors_not_using_keywords
-        return TfidfAuthorClusters(self.nonzero_authors, self.nonzero_mat, labels, zauthors)
+        return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, zauthors)
 
-    def plot_dendrogram(self, cutoff,  method: [str, None]=None):
+    ##################################################################################################
+    #        Hierarchical Clustering
+    ##################################################################################################
+
+    def plot_dendrogram(self, method: [str, None]=None):
 
         if method is None:
             method = 'ward'
         Z = linkage(self.nonzero_mat, method=method)
-        fig = plt.figure(figsize=(25, 10))
-        dn = dendrogram(Z, orientation='left', color_threshold=0.5*max(Z[:,2]), no_labels=True)
-        plt.show()
+        fig = plt.figure(figsize=(15, 50))
+        dn = dendrogram(Z, orientation='left', labels=self.nonzero_authors, leaf_font_size=11,
+                        color_threshold=max(Z[:, 2]))
+        # plt.show()
+        plt.savefig('hahaha.png')
 
-    def cluster_hcluster(self, keywords: list, method: [str, None]=None):
+    def cluster_hcluster(self, cutoff):
 
-        cluster_labels_hiearchial = fcluster(Z, 0.05, 'distance')
+        cluster_labels = fcluster(Z, cutoff, 'distance')
+        zauthors = self._get_zero_authors()
+        return TfidfAuthorClusters(self.nonzero_authors, self.nonzero_mat, cluster_labels, zauthors)

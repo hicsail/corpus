@@ -454,30 +454,34 @@ class DiffPropResults:
                 )
 
 
-class TfidfAuthorResultMat:
+# class TfidfAuthorResultMat:
+#     """
+#     the score matrix, either full mat or non_zero mat
+#     """
+#     def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list):
+#
+#         self.author_keywords_score_mat = author_keywords_score_mat
+#         self.authors = authors
+#         self.keywords = keywords
+#
+#         assert len(authors) == len(author_keywords_score_mat)
+#         assert len(keywords) == len(author_keywords_score_mat[0])
+#
+#     def write_csv(self, out_path: str):
+#         df = pd.DataFrame(data=self.author_keywords_score_mat, columns=self.keywords, index=self.authors)
+#         df.to_csv(out_path)
+
+
+class TfidfAuthorClusters():
     """
-    the score matrix, either full mat or non_zero mat
+    clustering results
     """
-    def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list):
+    def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list, cluster_labels: list,
+                 zero_authors: list):
 
         self.author_keywords_score_mat = author_keywords_score_mat
         self.authors = authors
         self.keywords = keywords
-
-        assert len(authors) == len(author_keywords_score_mat)
-        assert len(keywords) == len(author_keywords_score_mat[0])
-
-    def write_csv(self, out_path: str):
-        df = pd.DataFrame(data=self.author_keywords_score_mat, columns=self.keywords, index=self.authors)
-        df.to_csv(out_path)
-
-
-class TfidfAuthorClusters(TfidfAuthorResultMat):
-    """
-    clustering results
-    """
-    def __init__(self, authors: list, author_keywords_score_mat: np.ndarray, cluster_labels: list, zero_authors: list):
-        super(TfidfAuthorClusters, self).__init__(authors, author_keywords_score_mat)
         self.cluster_labels = cluster_labels
         self.zero_authors = zero_authors
 
@@ -489,7 +493,7 @@ class TfidfAuthorClusters(TfidfAuthorResultMat):
             clustered_authors_dict[k].append(v)
         return clustered_authors_dict
 
-    #TODO: may add some stats later
+    #TODO: may add some stats later?
     def write_authors_clustered(self, out_path: str, name: str):
         """
         :param out_path: the output file

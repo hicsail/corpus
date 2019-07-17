@@ -8,9 +8,11 @@ def setup_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-a", action="store", help="path to author_dict.json file")
+
     parser.add_argument("-i", action="store", help="input directory")
-    parser.add_argument("-o", action="store", help="output directory")
     parser.add_argument("-t", action="store", help="text field to analyze", default="Filtered Text")
+    parser.add_argument("-s", action="store", help="yes[y] to save the author_dict.json")
+    parser.add_argument("-o", action="store", help="output directory for all the results")
 
     parser.add_argument("-k", action="store", help="keywords")
 
@@ -26,34 +28,24 @@ if __name__ == '__main__':
         args.i
     )
 
-    if args.o is not None:
-        if not os.path.exists(args.o):
-            os.mkdir(args.o)
-        else:
-            shutil.rmtree(args.o)
-            os.mkdir(args.o)
-    else:
-        _fail("Please specify output directory.")
-
-        
+    #TODO: checkout the build_out in utils(?)
+    # out_dir = build_out(args.o)
+    out_dir = args.o
 
     model = c.tf_idf_author(
         'tfidf',
-        args.o
+        out_dir
     )
-    """
-       Build output directory, overwrite if it exists.
-       """
-
-
 
     # check args if author_dict is given:
     if args.a is not None:
         model.get_author_dict_from_json(args.a)
     else:
         model.generating_author_dict(args.t)
-        if args.o is not None:
-            model.write_author_dict_to_file(args.t, args.o)
+        if (args.s.lower() == 'yes') | (args.s.lower() == 'y'):
+            model.generating_author_dict(args.t, save=True)
+        else:
+            model.generating_author_dict(args.t, save=False)
 
     model.build_tf_idf_author_model()
     model.get_all_word_scores()
@@ -66,12 +58,19 @@ if __name__ == '__main__':
 
     keylist = re.split(r'\W+', args.k.lower())
 
-    score_mat = model.write_full_mat_csv(keylist)
-    score_mat.write_csv('/Users/Even/Desktop/POL-NLP/british_score_mat.csv')
+    score_mat = model.get_author_keywords_score_matrix(keylist)
 
-    # cluster_kmeans = model.cluster_kmeans(cooperation_list)
-    # cluster_kmeans.write_authors_clustered('/Users/Even/Desktop/danish_authors.json', 'kmeans')
+    full_mat_file = out_dir + '/author_keys_full_mat.csv'
+    score_mat.write_full_mat(full_mat_file)  # TODO: how to make this optional?
 
+    #TODO: maybe a while(1) loop instead of exit?
+    # result_kmeans = score_mat.cluster_kmeans()
+    # result_kmeans_file = out_dir + '/result_kmeans'
+    # result_kmeans.write_authors_clustered(result_kmeans_file, 'kmeans')
 
+    score_mat.plot_dendrogram('ward')
+    # result_hcluster = score_mat.cluster_hcluster(0.05)
+    # result_hcluster_file = out_dir + '/result_kmeans'
+    # result_hcluster.write_authors_clustered(result_hcluster_file, 'kmeans')
 
 

@@ -163,3 +163,14 @@ Output JSON files can also be passed to a graph alongside Frequency objects:
 
 This library also provides TF-IDF scoring, LDA / LSI Topic Modeling, and Difference in Proportions functions that can
 be applied to corpora in ways similar to the above. 
+
+### TF-IDF-Authors
+
+This class is to treat all documents written by the same author as one document and calculate their scores on a list of words chosen.
+It then provides clustering methods for exploration and visualization.
+
+#### To Use
+```angular2html
+
+
+```

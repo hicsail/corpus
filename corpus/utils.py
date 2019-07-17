@@ -130,6 +130,10 @@ def build_out(out_dir: str):
         else:
             shutil.rmtree(out_dir)
             os.mkdir(out_dir)
+            # TODO: how about this function returns a VALID directionary path as a string?
+            # #TODO:check with Ben
+
+
     else:
         _fail("Please specify output directory.")
 
