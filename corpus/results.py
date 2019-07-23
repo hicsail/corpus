@@ -503,7 +503,7 @@ class TfidfAuthorClusters():
         # clustered_authors_list = sorted(self._cluster_authors().items()) # returns a list of tuples
         clustered_authors_dict = OrderedDict(sorted(self._cluster_authors().items()))
 
-        with open(out_path + '.txt', 'w') as t:
+        with open(out_path, 'w') as t:
             print("Writing results to text file.")
             t.write("Clustered by {0}\n".format(name))
             t.write("Authors not used any key words:\n\t{0}\n".format(self.zero_authors))

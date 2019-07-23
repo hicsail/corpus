@@ -3,6 +3,7 @@ import shutil
 import json
 import tqdm
 import re
+from prompt_toolkit import prompt
 
 from nltk.stem.snowball import SnowballStemmer
 from gensim import corpora
@@ -118,7 +119,7 @@ def stem(word: str, language: [str, None] = 'english'):
     return '{0}: {1}'.format(word, stemmed)
 
 
-# TODO: ask user if they want to overwrite directory or add to it, if it exists
+# TODO: ask user if they want to overwrite directory or add to it, if it exists --DONE
 def build_out(out_dir: str):
     """
     Build output directory, overwrite if it exists.
@@ -128,11 +129,20 @@ def build_out(out_dir: str):
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)
         else:
-            shutil.rmtree(out_dir)
-            os.mkdir(out_dir)
-            # TODO: how about this function returns a VALID directionary path as a string?
-            # #TODO:check with Ben
-
+            while True:
+                ans = prompt("\nDirectory already exists. Do you want to overwrite[O] or add[A] to it?    ")
+                if ans == 'O':
+                    print("overwrite...")
+                    shutil.rmtree(out_dir)
+                    os.mkdir(out_dir)
+                    break
+                elif ans == 'A':
+                    print("add to...")
+                    # do nothing
+                    break
+                else:
+                    print("Command not recognized.")
+                    continue
 
     else:
         _fail("Please specify output directory.")

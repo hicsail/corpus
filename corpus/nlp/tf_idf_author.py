@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 import matplotlib.pyplot as plt
+from PIL import Image
 import pandas as pd
 
 from kneed import KneeLocator
@@ -65,7 +66,7 @@ class TfidfAuthor:
         Set author_dict from Json file.
         """
 
-        print("Loading author_dict from JSON file at {}\n".format(file_path))
+        print("\nLoading author_dict from JSON file at {}\n".format(file_path))
         exists = os.path.isfile(file_path)
         if exists:
             with open(file_path, 'r', encoding='utf8') as fp:
@@ -254,7 +255,6 @@ class AuthorKeywordsMat:
         # self.kmeans = None
         # self.hclustering = None
 
-
     def write_full_mat(self, outfile: str):
         df = pd.DataFrame(data=self.mat, columns=self.col_index, index=self.row_index)
         df.to_csv(outfile)
@@ -325,19 +325,26 @@ class AuthorKeywordsMat:
     #        Hierarchical Clustering
     ##################################################################################################
 
-    def plot_dendrogram(self, method: [str, None]=None):
-
+    def get_Z(self, method: [str, None]=None):
         if method is None:
             method = 'ward'
         Z = linkage(self.nonzero_mat, method=method)
-        fig = plt.figure(figsize=(15, 50))
-        dn = dendrogram(Z, orientation='left', labels=self.nonzero_authors, leaf_font_size=11,
+        return Z
+
+    def plot_dendrogram(self, Z):
+
+        figlen = len(self.nonzero_authors) / 9
+        fig = plt.figure(figsize=(15, figlen))
+
+        dn = dendrogram(Z, orientation='left', labels=self.nonzero_authors, leaf_font_size=9,
                         color_threshold=max(Z[:, 2]))
+
+        plt.tight_layout()
+        plt.savefig('temp.png', dpi=200)
         # plt.show()
-        plt.savefig('hahaha.png')
+        f = Image.open('temp.png').show()
 
-    def cluster_hcluster(self, cutoff):
-
+    def cluster_hcluster(self, Z, cutoff):
         cluster_labels = fcluster(Z, cutoff, 'distance')
         zauthors = self._get_zero_authors()
-        return TfidfAuthorClusters(self.nonzero_authors, self.nonzero_mat, cluster_labels, zauthors)
+        return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, zauthors)
