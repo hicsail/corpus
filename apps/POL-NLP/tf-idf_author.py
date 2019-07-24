@@ -85,7 +85,7 @@ if __name__ == '__main__':
             print("How many clusters are you expecting?")
             n = prompt("Input the number if you know it or any letter if you do not:    ")
             if n.isdigit():
-                result_kmeans = score_mat.cluster_kmeans(n)
+                result_kmeans = score_mat.cluster_kmeans(int(n))
             else:
                 result_kmeans = score_mat.cluster_kmeans()
 
