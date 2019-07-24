@@ -252,8 +252,6 @@ class AuthorKeywordsMat:
         self._get_nonzero_mat()
 
         self.tsne = None
-        # self.kmeans = None
-        # self.hclustering = None
 
     def write_full_mat(self, outfile: str):
         df = pd.DataFrame(data=self.mat, columns=self.col_index, index=self.row_index)
@@ -279,14 +277,22 @@ class AuthorKeywordsMat:
     #        authors not using any keywords are excluded
     ##################################################################################################
 
-    def compute_tsne(self):
+    def compute_tsne_and_plot(self):
 
         print("Computing t-SNE embedding on NON-zero authors")
         tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
         mat_tsne = tsne.fit_transform(self.nonzero_mat)
 
         self.tsne = mat_tsne
-        # TODO: plot?
+
+        # plotting
+        fig = plt.scatter(mat_tsne[:, 0], mat_tsne[:, 1])
+        fig.axes.get_xaxis().set_visible(False)
+        fig.axes.get_yaxis().set_visible(False)
+        plt.ion()
+        plt.pause(0.05)
+        plt.show()
+
         return self
 
     ##################################################################################################

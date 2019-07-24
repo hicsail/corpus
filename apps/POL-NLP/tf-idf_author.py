@@ -6,6 +6,7 @@ import argparse, re, os
 from prompt_toolkit import prompt
 from prompt_toolkit.validation import Validator, ValidationError
 
+
 def setup_parser():
 
     parser = argparse.ArgumentParser()
@@ -70,11 +71,16 @@ if __name__ == '__main__':
     else:
         print("Scores not saved")
 
-    ######################### If score mat available #############################
+    # ######################## If score mat csv file available #############################
+    # out_dir = args.o
     # full_mat_file = out_dir + '/author_keys_full_mat.csv'
     # df = pd.read_csv(full_mat_file, index_col=0)
     # score_mat = tf.AuthorKeywordsMat(df.values, [*df.index], [*df.columns])
-    ##############################################################################
+    # #############################################################################
+
+    see = prompt("Do you want to see the scatterplot after dimension reduction?  ([y] for yes):   ")
+    if (see.lower() == 'y') | (see.lower() == 'yes'):
+        score_mat.compute_tsne_and_plot()
 
     while True:
         print('\n-------------- Start clustering ------------------- \nWhat clustering method would you like to use?')
