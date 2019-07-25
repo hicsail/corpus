@@ -13,6 +13,7 @@ import pandas as pd
 from kneed import KneeLocator
 
 from corpus.results import *
+from corpus.graph import GraphClusters
 
 
 class TfidfAuthor:
@@ -249,6 +250,8 @@ class AuthorKeywordsMat:
 
         self.nonzero_mat = None
         self.nonzero_authors = None  # only for authors who used at least one keyword
+        self.zauthors = None
+
         self._get_nonzero_mat()
 
         self.tsne = None
@@ -263,35 +266,31 @@ class AuthorKeywordsMat:
         self.nonzero_authors = [self.row_index[i] for i in nonzero_index]
         self.nonzero_mat = [self.mat[i] for i in nonzero_index]
 
-        return self
-
-    def _get_zero_authors(self):
-
         zero_authors = list(set(self.row_index) - set(self.nonzero_authors))
         assert len(zero_authors) + len(self.nonzero_authors) == len(self.row_index)
+        self.zauthors= zero_authors
 
-        return zero_authors
+        return self
+
+    # def _get_zero_authors(self):
+    #
+    #     zero_authors = list(set(self.row_index) - set(self.nonzero_authors))
+    #     assert len(zero_authors) + len(self.nonzero_authors) == len(self.row_index)
+    #
+    #     return zero_authors
 
     ##################################################################################################
     #        t-SNE
     #        authors not using any keywords are excluded
     ##################################################################################################
 
-    def compute_tsne_and_plot(self):
+    def compute_tsne(self):
 
         print("Computing t-SNE embedding on NON-zero authors")
         tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
         mat_tsne = tsne.fit_transform(self.nonzero_mat)
 
         self.tsne = mat_tsne
-
-        # plotting
-        fig = plt.scatter(mat_tsne[:, 0], mat_tsne[:, 1])
-        fig.axes.get_xaxis().set_visible(False)
-        fig.axes.get_yaxis().set_visible(False)
-        plt.ion()
-        plt.pause(0.05)
-        plt.show()
 
         return self
 
@@ -322,10 +321,9 @@ class AuthorKeywordsMat:
         kmeans.fit(self.nonzero_mat)
 
         cluster_labels = kmeans.predict(self.nonzero_mat)
-        zauthors = self._get_zero_authors()
 
-        # return authors, mat, labels and authors_not_using_keywords
-        return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, zauthors)
+        # return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, self.zauthors)
+        return cluster_labels
 
     ##################################################################################################
     #        Hierarchical Clustering
@@ -337,7 +335,7 @@ class AuthorKeywordsMat:
         Z = linkage(self.nonzero_mat, method=method)
         return Z
 
-    def plot_dendrogram(self, Z):
+    def plot_dendrogram_and_save(self, Z, out_fig):
 
         figlen = len(self.nonzero_authors) / 9
         fig = plt.figure(figsize=(15, figlen))
@@ -346,11 +344,12 @@ class AuthorKeywordsMat:
                         color_threshold=max(Z[:, 2]))
 
         plt.tight_layout()
-        plt.savefig('temp.png', dpi=200)
+        plt.savefig(out_fig, dpi=200)
         # plt.show()
-        f = Image.open('temp.png').show()
+        f = Image.open(out_fig).show()
 
     def cluster_hcluster(self, Z, cutoff):
         cluster_labels = fcluster(Z, cutoff, 'distance')
-        zauthors = self._get_zero_authors()
-        return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, zauthors)
+
+        # return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, self.zauthors)
+        return cluster_labels
