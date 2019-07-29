@@ -100,18 +100,19 @@ class Corpus:
 
         return t
 
-    def tf_idf_author(self, name: str, out_dir: str=None):
+    def tf_idf_author(self, name: str, out_dir: str, text_type: str = 'Text'):
         """
-        Find author with highest TF-IDF scores w/r/t a keyword within a corpus.
+        Get TF-IDF scores for authors w/r/t all words within a corpus.
         """
 
-        t = tf_idf_author.TfidfAuthor(
+        ta = tf_idf_author.TfidfAuthor(
             name,
             self.in_dir,
-            out_dir
+            out_dir,
+            text_type,
         )
 
-        return t
+        return ta
 
     def raw_frequency(self, name: str,  key_list: list, text_type: str = 'Text', binary: bool = False):
         """

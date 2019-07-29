@@ -23,11 +23,13 @@ class TfidfAuthor:
     """
 
     def __init__(
-            self, name: str, in_dir: str, out_dir: str, stop_words: [list, set, None] = None):
+            self, name: str, in_dir: str, out_dir: str, text_type: str, stop_words: [list, set, None] = None):
 
         self.name = name
         self.in_dir = in_dir
+        self.text_type = text_type
         self.out_dir = out_dir
+
         self.stop_words = self.setup_stop_words(stop_words)
 
         self.author_dict = None
@@ -73,12 +75,11 @@ class TfidfAuthor:
             with open(file_path, 'r', encoding='utf8') as fp:
                 self.author_dict = json.load(fp)
         else:
-            print("\nAuthor dict not found, please use 'generating_author_dict' to generate author_dict, \
-            \nor use 'write_author_dict_to_file' if you want ot save it")
+            return -1
 
         return self
 
-    def generating_author_dict(self, text_type: str, save: bool=True):
+    def generating_author_dict(self, save: bool=True):
         author_dict = dict()
         for subdir, dirs, files in os.walk(self.in_dir):
             for jsondoc in tqdm.tqdm(files):
@@ -89,7 +90,7 @@ class TfidfAuthor:
                             for k in json_data.keys():
                                 author_raw = (json_data[k]["Author"]).lower()
                                 author = re.sub(r'\W+', '_', author_raw)
-                                text = json_data[k][text_type]
+                                text = json_data[k][self.text_type]
                                 author_dict[author] = []
                                 author_dict[author].extend(text)
 
@@ -100,9 +101,12 @@ class TfidfAuthor:
 
         if save:
             print("\nWriting author_dict to csv file... might take a while...\n")
-            outfile = self.out_dir + "/author_dict.json"
+            lag = self.in_dir.split('/')[-1]
+            outfile = self.out_dir + '/' + lag + "_author_dict.json"
             with open(outfile, 'w') as fp:
                 json.dump(self.author_dict, fp, sort_keys=True, indent=4)
+
+            print("\nFile saved to ", outfile)
 
         return self
 

@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import json
 import matplotlib.pyplot as plt
@@ -374,7 +373,7 @@ class GraphClusters:
 
         self.plt = plt
         self.plt.ion()
-        self.plt.pause(0.05)
+        self.plt.pause(0.01)
         self.plt.show()
 
     def save(self, out_path: str):
@@ -389,5 +388,6 @@ class GraphClusters:
                   "Please use one of the following: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz")
 
     def close(self):
-        print("IN", plt.get_fignums())
+        # print("IN", plt.get_fignums())
         self.plt.close(plt.gcf())
+        del self
