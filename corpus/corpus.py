@@ -3,7 +3,7 @@ import json
 import sys
 import nltk
 
-from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency
+from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency, tf_idf_author
 from corpus.utils import *
 
 
@@ -99,6 +99,20 @@ class Corpus:
         )
 
         return t
+
+    def tf_idf_author(self, name: str, out_dir: str, text_type: str = 'Text'):
+        """
+        Get TF-IDF scores for authors w/r/t all words within a corpus.
+        """
+
+        ta = tf_idf_author.TfidfAuthor(
+            name,
+            self.in_dir,
+            out_dir,
+            text_type,
+        )
+
+        return ta
 
     def raw_frequency(self, name: str,  key_list: list, text_type: str = 'Text', binary: bool = False):
         """

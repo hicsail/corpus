@@ -1,6 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import json
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 
 class GraphFrequency:
@@ -329,3 +330,64 @@ class GraphFrequency:
                   "Please use one of the following: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz")
 
 
+class GraphClusters:
+    """
+    visualize clustering results after applying dimension reduction to 2D
+    """
+
+    def __init__(self, data_2d: np.ndarray, title: str):
+        plt.close('all')
+        self.data_2d = data_2d
+        self.title = title
+
+        self.fig = None
+        self.plt = None
+
+    def show_plot(self, cluster_labels: [list, None] = None):
+        """
+        generate a colormap according to the clustering result and plot
+        """
+        # setup the plot
+        fig, ax = plt.subplots(1, 1, figsize=(6, 6))
+        if cluster_labels is not None:
+            n = len(set(cluster_labels))
+            cmap = plt.get_cmap('jet', n)
+            # define the bins and normalize
+            bounds = np.linspace(0, n, n + 1)
+            norm = colors.BoundaryNorm(bounds, cmap.N)
+            # the plot
+            scat = ax.scatter(self.data_2d[:, 0], self.data_2d[:, 1], c=cluster_labels, cmap=cmap, norm=norm)
+            # the colorbar
+            cb = plt.colorbar(scat, drawedges=True)
+            cb.set_label('Group Number')
+            tick_locs = bounds + 0.5
+            cb.set_ticks(tick_locs)
+            cb.set_ticklabels([('#' + str(int(b))) for b in bounds + 1])
+
+        else:
+            scat = ax.scatter(self.data_2d[:, 0], self.data_2d[:, 1])
+
+        scat.axes.get_xaxis().set_visible(False)
+        scat.axes.get_yaxis().set_visible(False)
+        ax.set_title(self.title)
+
+        self.plt = plt
+        self.plt.ion()
+        self.plt.pause(0.01)
+        self.plt.show()
+
+    def save(self, out_path: str):
+        """
+        Save graph to file
+        """
+
+        try:
+            self.plt.savefig(out_path)
+        except ValueError:
+            print("Unsupported file format. \n"
+                  "Please use one of the following: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz")
+
+    def close(self):
+        # print("IN", plt.get_fignums())
+        self.plt.close(plt.gcf())
+        del self

@@ -163,3 +163,37 @@ Output JSON files can also be passed to a graph alongside Frequency objects:
 
 This library also provides TF-IDF scoring, LDA / LSI Topic Modeling, and Difference in Proportions functions that can
 be applied to corpora in ways similar to the above. 
+
+### TF-IDF-Authors
+
+This class is to treat all documents written by the same author as one document and calculate their scores on a list of 
+words chosen.
+It then provides clustering methods for exploration andexit visualization.
+It first builds an author dictionary given the input directory where the files contained are in the same format as 
+mentioned in the **Data Format**. It then creates a matrix storing the tf-idf scores. The rows of the matrix are all the 
+authors and columns the chosen keywords.  
+Based on the matrix, the program provides users options for different clustering methods to explore the data and 
+present results both in text and figures for visualization.
+
+#### To Use
+
+**First time use**:
+```
+python3 ../build_author_dict.py -i input_directory -o output_directory -t text_type
+```
+This will generate a json document indexed by authors. Run this script every time you change the files in the input directory.
+
+**Run**
+```
+python3 ../tf-idf_author.py -a author_dict.json -o result_directory -k keywords
+```
+It is recommended that the result_directory is different from the directory where you save your `*_author_dict.json`.
+The result_directory could be overwritten by your choice.
+It is also recommended that you create different result_directory for each different set of keywords.
+
+**To jump start on the clustering and visualization**
+If you choose to save the author tf-idf scores based on the given keywords, you can jump start the script next time you run it.
+```
+python3 ../tf-idf_author.py -o result_directory --jump_start
+```
+Note: the result_directory must contain the `author_keys_full_mat.csv` file.

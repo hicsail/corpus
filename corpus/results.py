@@ -1,6 +1,9 @@
 import re
 import json
-
+import csv
+import pandas as pd
+import numpy as np
+from collections import defaultdict, OrderedDict
 from corpus.utils import *
 
 
@@ -13,7 +16,6 @@ class Results:
 
         self.d = d
         self.n = n
-        self.years = [y[0] for y in self.d.items()]
 
 
 class FrequencyResults(Results):
@@ -27,6 +29,7 @@ class FrequencyResults(Results):
 
         self.name = name
         self.f_type = f_type
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -152,6 +155,7 @@ class TopResults(Results):
         super(TopResults, self).__init__(d, n)
 
         self.name = name
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -221,6 +225,7 @@ class TfidfResults(Results):
 
         self.keyword = keyword
         self.name = name
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -293,6 +298,7 @@ class TopicResults(Results):
         super(TopicResults, self).__init__(d, n)
 
         self.name = name
+        self.years = [y[0] for y in self.d.items()]
 
     def debug_str(self):
         """
@@ -446,3 +452,42 @@ class DiffPropResults:
                     "Critical: {0}\n"
                     .format(str(self.d['Critical']))
                 )
+
+
+class TfidfAuthorClusters:
+    """
+    clustering results
+    """
+    def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list, cluster_labels: list,
+                 zero_authors: list):
+
+        self.author_keywords_score_mat = author_keywords_score_mat
+        self.authors = authors
+        self.keywords = keywords
+        self.cluster_labels = cluster_labels
+        self.zero_authors = zero_authors
+
+        assert len(authors) == len(cluster_labels)
+
+    def _cluster_authors(self):
+        clustered_authors_dict = defaultdict(list)
+        for k, v in zip(self.cluster_labels, self.authors):
+            clustered_authors_dict[k].append(v)
+        return clustered_authors_dict
+
+    # TODO: may add some stats later?
+    def write_authors_clustered(self, out_path: str, name: str):
+        """
+        :param out_path: the output file
+        :param name: name of the clustering method
+        """
+        # n_clusters = set(self.cluster_labels)
+        # clustered_authors_list = sorted(self._cluster_authors().items()) # returns a list of tuples
+        clustered_authors_dict = OrderedDict(sorted(self._cluster_authors().items()))
+
+        with open(out_path, 'w') as t:
+            print("Writing results to text file.")
+            t.write("Clustered by {0}\n".format(name))
+            t.write("Authors not used any key words:\n\t{0}\n".format(self.zero_authors))
+            for key, val in clustered_authors_dict.items():
+                t.write("Group {0}:\n\t{1}\n".format(key, val))
