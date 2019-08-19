@@ -1,8 +1,5 @@
 import os
 import shutil
-import json
-import tqdm
-import re
 from prompt_toolkit import prompt
 
 from nltk.stem.snowball import SnowballStemmer

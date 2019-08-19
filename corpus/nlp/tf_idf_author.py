@@ -1,5 +1,3 @@
-import numpy as np
-
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 from sklearn import manifold
@@ -13,7 +11,7 @@ import pandas as pd
 from kneed import KneeLocator
 
 from corpus.results import *
-from corpus.graph import GraphClusters
+
 
 
 class TfidfAuthor:

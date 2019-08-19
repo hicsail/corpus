@@ -1,5 +1,3 @@
-import tqdm
-import json
 import sys
 import nltk
 
