@@ -7,11 +7,13 @@ from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 import matplotlib.pyplot as plt
 from PIL import Image
 import pandas as pd
+import json
+import re
+import tqdm
 
 from kneed import KneeLocator
 
 from corpus.results import *
-
 
 
 class TfidfAuthor:
