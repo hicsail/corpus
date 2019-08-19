@@ -101,8 +101,7 @@ class TfidfAuthor:
 
         if save:
             print("\nWriting author_dict to csv file... might take a while...\n")
-            lag = self.in_dir.split('/')[-1]
-            outfile = self.out_dir + '/' + lag + "_author_dict.json"
+            outfile = self.out_dir + "_author_dict.json"
             with open(outfile, 'w') as fp:
                 json.dump(self.author_dict, fp, sort_keys=True, indent=4)
 

@@ -1,5 +1,7 @@
 import sys
 import nltk
+import json
+import tqdm
 
 from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency, tf_idf_author
 from corpus.utils import *
