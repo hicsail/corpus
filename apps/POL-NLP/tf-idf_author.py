@@ -1,11 +1,12 @@
 from corpus import corpus, utils, results, graph
 from corpus.nlp import tf_idf_author as tf
+
 import pandas as pd
-import sys, csv
-import argparse, re, os
-import matplotlib.pyplot as plt
+import sys
+import argparse
+import re
+
 from prompt_toolkit import prompt
-from prompt_toolkit.validation import Validator, ValidationError
 
 
 def setup_parser():
@@ -13,14 +14,12 @@ def setup_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-a", action="store", help="path to *_author_dict.json file")
-
-    # parser.add_argument("-i", action="store", help="input directory")
-    # parser.add_argument("-t", action="store", help="text field to analyze", default="Filtered Text")
     parser.add_argument("-o", action="store", help="output directory where all the results will be saved")
     parser.add_argument('--jump_start', action="store_true", help="use only if author_keys_full_mat.csv is available")
     parser.add_argument("-k", action="store", help="keywords")
 
     return parser.parse_args()
+
 
 def analyze():
     see = prompt("Do you want to see the scatterplot using tSNE dimension reduction?  ([y] for yes):   ")
@@ -101,8 +100,6 @@ def analyze():
             else:
                 print("Result not saved")
 
-            # graphTSNE.close()
-
         elif cluster_method == 'exit':
             print("Bye.")
             sys.exit()
@@ -117,7 +114,7 @@ if __name__ == '__main__':
     args = setup_parser()
     out_dir = args.o
 
-    ######################## If score mat csv file available #############################
+    # If score mat csv file available
     if args.jump_start is True:
         try:
             full_mat_file = out_dir + '/author_keys_full_mat.csv'
@@ -128,7 +125,6 @@ if __name__ == '__main__':
         except IOError:
             print("Error opening author_keys_full_mat.csv file. Please check your result_directory")
             sys.exit()
-    ######################################################################################
 
     c = corpus.Corpus(
         'corpus',

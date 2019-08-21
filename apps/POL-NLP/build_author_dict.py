@@ -1,11 +1,6 @@
-from corpus import corpus, utils, results, graph
-from corpus.nlp import tf_idf_author as tf
-import pandas as pd
-import sys, csv
-import argparse, re, os
-import matplotlib.pyplot as plt
-from prompt_toolkit import prompt
-from prompt_toolkit.validation import Validator, ValidationError
+import argparse
+
+from corpus import corpus
 
 
 def setup_parser():

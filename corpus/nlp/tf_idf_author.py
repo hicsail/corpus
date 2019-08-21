@@ -2,16 +2,15 @@ from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 from sklearn import manifold
 from sklearn.cluster import KMeans
-
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
-import matplotlib.pyplot as plt
 from PIL import Image
+from kneed import KneeLocator
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import json
 import re
 import tqdm
-
-from kneed import KneeLocator
 
 from corpus.results import *
 
@@ -43,7 +42,7 @@ class TfidfAuthor:
 
         if stop_words is not None:
             if isinstance(stop_words, str):
-                return self._stop_words_from_json(stop_words)
+                return self.stop_words_from_json(stop_words)
             elif isinstance(stop_words, list):
                 return set(stop_words)
             else:
@@ -51,7 +50,8 @@ class TfidfAuthor:
         else:
             return {}
 
-    def _stop_words_from_json(self, file_path: str):
+    @staticmethod
+    def stop_words_from_json(file_path: str):
         """
         Set stop_words from Json file.
         """
@@ -80,6 +80,7 @@ class TfidfAuthor:
         return self
 
     def generating_author_dict(self, save: bool=True):
+        
         author_dict = dict()
         for subdir, dirs, files in os.walk(self.in_dir):
             for jsondoc in tqdm.tqdm(files):
@@ -112,8 +113,7 @@ class TfidfAuthor:
     def build_dictionaries_and_corpora(self):
         """
         Construct word_to_id which store the word -> id mappings and the bag of words
-        representations of the documents in the corpus. Used for building TF-IDF models
-        and LDA / LSI topic models.
+        representations of the documents in the corpus.
         """
 
         if self.word_to_id is not None:
@@ -126,15 +126,10 @@ class TfidfAuthor:
 
         for author, text in self.author_dict.items():
 
-            # for i in range(len(text) - 1, -1, -1):
-            #     if text[i] in self.stop_words:
-            #         del text[i]
             if len(text) > 0:
                 word_to_id.add_documents([text])
                 d2b = word_to_id.doc2bow(text)
                 corpora_results.append(d2b)
-
-        # corpora_results = [word_to_id.doc2bow(text) for _, text in self.author_dict.items()]
 
         self.word_to_id = word_to_id
         self.corpora = corpora_results
