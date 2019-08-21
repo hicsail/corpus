@@ -80,7 +80,7 @@ class TfidfAuthor:
         return self
 
     def generating_author_dict(self, save: bool=True):
-        
+
         author_dict = dict()
         for subdir, dirs, files in os.walk(self.in_dir):
             for jsondoc in tqdm.tqdm(files):
@@ -270,18 +270,6 @@ class AuthorKeywordsMat:
 
         return self
 
-    # def _get_zero_authors(self):
-    #
-    #     zero_authors = list(set(self.row_index) - set(self.nonzero_authors))
-    #     assert len(zero_authors) + len(self.nonzero_authors) == len(self.row_index)
-    #
-    #     return zero_authors
-
-    ##################################################################################################
-    #        t-SNE
-    #        authors not using any keywords are excluded
-    ##################################################################################################
-
     def compute_tsne(self):
 
         print("Computing t-SNE embedding on NON-zero authors")
@@ -292,14 +280,7 @@ class AuthorKeywordsMat:
 
         return self
 
-    ##################################################################################################
-    #        Clustering Methods
-    #        authors not using any keywords are excluded
-    ##################################################################################################
-    #        K-Means
-    ##################################################################################################
-
-    def cluster_kmeans(self, n: [int, None]=None):
+    def cluster_kmeans(self, n: [int, None] = None):
 
         if n is None:
             print("You did not specify a cluster number.\nLet me try to find one for you.")
@@ -320,12 +301,7 @@ class AuthorKeywordsMat:
 
         cluster_labels = kmeans.predict(self.nonzero_mat)
 
-        # return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, self.zauthors)
         return cluster_labels
-
-    ##################################################################################################
-    #        Hierarchical Clustering
-    ##################################################################################################
 
     def get_Z(self, method: [str, None]=None):
         if method is None:
@@ -349,5 +325,4 @@ class AuthorKeywordsMat:
     def cluster_hcluster(self, Z, cutoff):
         cluster_labels = fcluster(Z, cutoff, 'distance')
 
-        # return TfidfAuthorClusters(self.nonzero_mat, self.nonzero_authors, self.col_index, cluster_labels, self.zauthors)
         return cluster_labels
