@@ -48,7 +48,20 @@ def num_dict(alist: list, keywords: [list, None]=None, nested: [int, None]=0):
     return results
 
 
-def list_dict(alist: list, keywords: [list, None]=None, nested: [None, int]=0):
+def simple_dict(alist: list):
+    """
+    Build simple dict of dicts.
+    """
+
+    results = {}
+
+    for item in alist:
+        results[item] = {}
+
+    return results
+
+
+def list_dict(alist: list, keywords: [list, None] = None, nested: [None, int] = 0):
     """
     Build empty dictionary with lists at leaf entries.
     alist: year_list or author_list

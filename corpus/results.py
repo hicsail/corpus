@@ -1,5 +1,8 @@
 import numpy as np
+import json
+
 from collections import defaultdict, OrderedDict
+
 from corpus.utils import *
 
 
@@ -454,6 +457,7 @@ class TfidfAuthorClusters:
     """
     clustering results
     """
+
     def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list, cluster_labels: list,
                  zero_authors: list):
 
@@ -477,8 +481,7 @@ class TfidfAuthorClusters:
         :param out_path: the output file
         :param name: name of the clustering method
         """
-        # n_clusters = set(self.cluster_labels)
-        # clustered_authors_list = sorted(self._cluster_authors().items()) # returns a list of tuples
+
         clustered_authors_dict = OrderedDict(sorted(self._cluster_authors().items()))
 
         with open(out_path, 'w') as t:

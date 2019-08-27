@@ -1,5 +1,5 @@
 import tqdm
-import json
+import re
 
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
@@ -27,6 +27,7 @@ class Tfidf:
         self.tf_idf_models = None
         self.word_to_id = None
         self.corpora = None
+        self.author_dict = None
 
     def setup_stop_words(self, stop_words):
 
@@ -40,7 +41,8 @@ class Tfidf:
         else:
             return {}
 
-    def stop_words_from_json(self, file_path: str):
+    @staticmethod
+    def stop_words_from_json(file_path: str):
         """
         Set stop_words from Json file.
         """
@@ -98,12 +100,10 @@ class Tfidf:
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
 
                         try:
-
                             json_data = json.load(in_file)
                             for k in json_data.keys():
 
                                 self._update_dictionaries_and_corpora(k, json_data, word_to_id_results, corpora_results)
-
                         except json.decoder.JSONDecodeError:
 
                             print("Error loading file {}".format(jsondoc))
@@ -230,18 +230,88 @@ class Tfidf:
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
 
                         try:
-
                             json_data = json.load(in_file)
                             for k in json_data.keys():
 
                                 self._update_top_n(k, json_data, results, num_docs, keyword, jsondoc)
 
                         except json.decoder.JSONDecodeError:
-
                             print("Error loading file {}".format(jsondoc))
 
         top_results = self._top_n(results, n)
 
         return TfidfResults(top_results, num_docs, keyword, self.name)
+
+    @staticmethod
+    def _cleanup_author_dict(doc_to_bow_list):
+
+        ret = {}
+
+        for t in doc_to_bow_list:
+
+            try:
+                ret[t[0]] += t[1]
+
+            except KeyError:
+                ret[t[0]] = t[1]
+
+        return [(k, ret[k]) for k in ret.keys()]
+
+    def cleanup_author_dict(self, author_dict):
+
+        for k in author_dict.keys():
+            for kk in author_dict[k].keys():
+
+                new_doc_to_bow = self._cleanup_author_dict(author_dict[k][kk])
+                author_dict[k][kk] = new_doc_to_bow
+
+        return author_dict
+
+    def _partition_by_author(self, k, json_data, author_dict):
+
+        year = int(json_data[k][self.date_key])
+
+        if self.year_list[0] <= year < self.year_list[-1]:
+
+            text = json_data[k][self.text_type]
+            author = re.sub(r'\W+', '_', json_data[k]["Author"]).lower()
+            target = determine_year(year, self.year_list)
+
+            d2b = self.word_to_id[target].doc2bow(text)
+
+            try:
+                author_dict[target][author].extend(d2b)
+
+            except KeyError:
+                author_dict[target][author] = d2b
+
+    def partition_by_author(self):
+
+        if self.tf_idf_models is None:
+            self.build_tf_idf_models()
+
+        author_dict = simple_dict(self.year_list)
+
+        print("Partitioning corpus by author.\n")
+
+        for subdir, dirs, files in os.walk(self.in_dir):
+            for jsondoc in tqdm.tqdm(files):
+                if jsondoc[0] != ".":
+
+                    with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8')  as infile:
+
+                        try:
+                            json_data = json.load(infile)
+                            for k in json_data.keys():
+
+                                self._partition_by_author(k, json_data, author_dict)
+
+                        except json.decoder.JSONDecodeError:
+
+                            print("Error loading file {}".format(jsondoc))
+
+        self.author_dict = self.cleanup_author_dict(author_dict)
+
+        return self
 
 

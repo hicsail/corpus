@@ -157,10 +157,12 @@ class Frequency:
             else:
 
                 for kw in fdist:
+
                     try:
                         frequency_lists[target]['FDIST'][kw] += fdist[kw]
                     except KeyError:
                         frequency_lists[target]['FDIST'][kw] = fdist[kw]
+
                 frequency_lists[target]['NUM_DOCS'] += 1
                 frequency_lists[target]['TOTAL_WORDS'] += len(text)
 
@@ -184,12 +186,10 @@ class Frequency:
                     with open(os.path.join(self.in_dir, json_doc), 'r', encoding='utf8') as in_file:
 
                         try:
-
                             json_data = json.load(in_file)
                             for k in list(json_data.keys()):
 
                                 self._update_frequency_lists(frequency_lists, json_data[k], n)
-
                         except json.decoder.JSONDecodeError:
 
                             print("Error loading file {}".format(json_doc))

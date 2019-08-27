@@ -100,7 +100,8 @@ class Corpus:
 
         return t
 
-    def tf_idf_author(self, name: str, out_dir: str, text_type: str = 'Text'):
+    def tf_idf_author(self, name: str, out_dir: str, year_list: list, text_type: str = 'Text',
+                      date_key: [None, str] = "Date", stop_words: [list, set, None] = None):
         """
         Get TF-IDF scores for authors w/r/t all words within a corpus.
         """
@@ -110,6 +111,9 @@ class Corpus:
             self.in_dir,
             out_dir,
             text_type,
+            year_list,
+            date_key,
+            stop_words
         )
 
         return ta

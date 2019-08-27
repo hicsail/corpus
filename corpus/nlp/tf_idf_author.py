@@ -8,7 +8,6 @@ from kneed import KneeLocator
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import json
 import re
 import tqdm
 
@@ -22,13 +21,15 @@ class TfidfAuthor:
     """
 
     def __init__(
-            self, name: str, in_dir: str, out_dir: str, text_type: str, stop_words: [list, set, None] = None):
+            self, name: str, in_dir: str, out_dir: str, text_type: str, year_list: list,
+            date_key: str, stop_words: [list, set, None] = None):
 
         self.name = name
         self.in_dir = in_dir
-        self.text_type = text_type
         self.out_dir = out_dir
-
+        self.text_type = text_type
+        self.year_list = year_list
+        self.date_key = date_key
         self.stop_words = self.setup_stop_words(stop_words)
 
         self.author_dict = None
@@ -79,7 +80,7 @@ class TfidfAuthor:
 
         return self
 
-    def generating_author_dict(self, save: bool=True):
+    def partition_by_author(self):
 
         author_dict = dict()
         for subdir, dirs, files in os.walk(self.in_dir):
@@ -94,21 +95,21 @@ class TfidfAuthor:
                                 text = json_data[k][self.text_type]
                                 author_dict[author] = []
                                 author_dict[author].extend(text)
-
                         except json.decoder.JSONDecodeError:
                             print("Error loading file {}".format(jsondoc))
 
         self.author_dict = author_dict
 
-        if save:
-            print("\nWriting author_dict to csv file... might take a while...\n")
-            outfile = self.out_dir + "_author_dict.json"
-            with open(outfile, 'w') as fp:
-                json.dump(self.author_dict, fp, sort_keys=True, indent=4)
-
-            print("\nFile saved to ", outfile)
-
         return self
+
+    def save_partitioned_model(self):
+
+        print("\nWriting author_dict to csv file... might take a while...\n")
+        outfile = self.out_dir + "_author_dict.json"
+        with open(outfile, 'w') as fp:
+            json.dump(self.author_dict, fp, sort_keys=True, indent=4)
+
+        print("\nFile saved to ", outfile)
 
     def build_dictionaries_and_corpora(self):
         """
@@ -119,8 +120,8 @@ class TfidfAuthor:
         if self.word_to_id is not None:
             return
 
-        word_to_id = corpora.Dictionary()
-        corpora_results = []
+        word_to_id = gensim_dict(self.year_list)
+        corpora_results = list_dict(self.year_list)
 
         print("Building word to ID mappings.\n")
 
@@ -243,11 +244,11 @@ class AuthorKeywordsMat:
         assert len(col_index) == len(mat[0])
 
         self.mat = mat
-        self.row_index = row_index  # authors
-        self.col_index = col_index  # keywords
+        self.row_index = row_index
+        self.col_index = col_index
 
         self.nonzero_mat = None
-        self.nonzero_authors = None  # only for authors who used at least one keyword
+        self.nonzero_authors = None
         self.zauthors = None
 
         self._get_nonzero_mat()
@@ -255,6 +256,7 @@ class AuthorKeywordsMat:
         self.tsne = None
 
     def write_full_mat(self, outfile: str):
+
         df = pd.DataFrame(data=self.mat, columns=self.col_index, index=self.row_index)
         df.to_csv(outfile)
 
@@ -303,11 +305,11 @@ class AuthorKeywordsMat:
 
         return cluster_labels
 
-    def get_Z(self, method: [str, None]=None):
-        if method is None:
-            method = 'ward'
-        Z = linkage(self.nonzero_mat, method=method)
-        return Z
+    def get_z(self, method: [str, None] = 'ward'):
+
+        z = linkage(self.nonzero_mat, method=method)
+
+        return z
 
     def plot_dendrogram_and_save(self, Z, out_fig):
 
