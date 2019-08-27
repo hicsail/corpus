@@ -31,7 +31,11 @@ if __name__ == '__main__':
         args.t,
     )
 
-    results = [tfidf.top_n(k.lower(), int(args.n)) for k in args.k.split(",")]
+    # results = [tfidf.top_n(k.lower(), int(args.n)) for k in args.k.split(",")]
+    #
+    # for r in results:
+    #     r.display()
 
-    for r in results:
-        r.display()
+    ad = tfidf.partition_by_author()
+
+    print("Hi")

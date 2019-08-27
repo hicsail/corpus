@@ -26,7 +26,8 @@ if __name__ == '__main__':
     model = c.tf_idf_author(
         'tfidf_author',
         out_dir=args.o,
+        year_list=[1700, 1950],
         text_type=args.t
     )
 
-    model.generating_author_dict()
+    model.partition_by_author()

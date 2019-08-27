@@ -22,6 +22,7 @@ def setup_parser():
 
 
 def analyze():
+
     see = prompt("Do you want to see the scatterplot using tSNE dimension reduction?  ([y] for yes):   ")
     if (see.lower() == 'y') | (see.lower() == 'yes'):
         score_mat.compute_tsne()
@@ -30,7 +31,6 @@ def analyze():
 
     while True:
         print('\n-------------- Start clustering ------------------- \nWhat clustering method would you like to use?')
-        # TODO: could incorporate more
         cluster_method = prompt("[k] for k-means, [h] for hierarchical clustering, [exit] for exit the program:     ")
 
         if cluster_method == 'k':
