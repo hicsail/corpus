@@ -81,8 +81,6 @@ class DiffProportions:
     def diff_props_test(k1, n1, k2, n2):
         """
         Take difference of proportions
-        Documentation:
-        http://statsmodels.sourceforge.net/devel/generated/statsmodels.stats.proportion.proportions_ztest.html
         """
 
         (z, p_value) = statsmodels.api.stats.proportions_ztest(
