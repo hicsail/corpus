@@ -37,5 +37,4 @@ if __name__ == '__main__':
     #     r.display()
 
     ad = tfidf.partition_by_author()
-
-    print("Hi")
+    sd = tfidf.setup_scores_dict(["hi", "cat", "mat", "__www___"])

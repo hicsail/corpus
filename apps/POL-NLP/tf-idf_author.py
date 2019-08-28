@@ -67,13 +67,13 @@ def analyze():
 
         elif cluster_method == 'h':
             print("Please choose a linkage method from below for defining cluster distance. Default is 'ward'")
-            dist_meth = prompt("single, complete, ward, average, weighted, centroid, median:    ")
+            dist_meth = prompt("single, complete, ward, average, weighted, centroid, median:  ")
             # TODO: what if user input is an invalid method?
             Z = score_mat.get_Z(dist_meth)
             out_fig = out_dir + '/' + 'dendrogram_' + dist_meth + '.png'
             score_mat.plot_dendrogram_and_save(Z, out_fig)
 
-            cutoff = prompt("After you see the dendrogram, please check the bottom axis and pick a cutoff value:    ")
+            cutoff = prompt("After you see the dendrogram, please check the bottom axis and pick a cutoff value:  ")
             # TODO: do I want to validate the input?
 
             clabels = score_mat.cluster_hcluster(Z, float(cutoff))
