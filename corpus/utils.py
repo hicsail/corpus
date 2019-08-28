@@ -1,7 +1,7 @@
 import os
 import shutil
-from prompt_toolkit import prompt
 
+from prompt_toolkit import prompt
 from nltk.stem.snowball import SnowballStemmer
 from gensim import corpora
 
@@ -156,9 +156,3 @@ def build_out(out_dir: str):
 
     else:
         _fail("Please specify output directory.")
-
-
-
-
-
-
