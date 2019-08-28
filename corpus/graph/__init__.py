@@ -1,7 +1,7 @@
 import numpy as np
 import json
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+import matplotlib.colors as c
 
 
 class GraphFrequency:
@@ -354,7 +354,7 @@ class GraphClusters:
             cmap = plt.get_cmap('jet', n)
             # define the bins and normalize
             bounds = np.linspace(0, n, n + 1)
-            norm = colors.BoundaryNorm(bounds, cmap.N)
+            norm = c.BoundaryNorm(bounds, cmap.N)
             # the plot
             scat = ax.scatter(self.data_2d[:, 0], self.data_2d[:, 1], c=cluster_labels, cmap=cmap, norm=norm)
             # the colorbar
@@ -388,6 +388,5 @@ class GraphClusters:
                   "Please use one of the following: eps, pdf, pgf, png, ps, raw, rgba, svg, svgz")
 
     def close(self):
-        # print("IN", plt.get_fignums())
         self.plt.close(plt.gcf())
         del self
