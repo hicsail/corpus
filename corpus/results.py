@@ -1,5 +1,6 @@
 import numpy as np
 import json
+import re
 
 from collections import defaultdict, OrderedDict
 
@@ -85,8 +86,8 @@ class FrequencyResults(Results):
         Write contents of FrequencyResults object to file.
         """
 
-        with open(out_path + '.txt', 'w') as t:
-            print("Writing results to text file.")
+        with open(out_path, 'w') as t:
+            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -170,8 +171,8 @@ class TopResults(Results):
         Write contents of Frequency object to file.
         """
 
-        with open(out_path + '.txt', 'w') as t:
-            print("Writing results to text file.")
+        with open(out_path, 'w') as t:
+            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -240,8 +241,8 @@ class TfidfResults(Results):
         Write contents of Tfidf object to file.
         """
 
-        with open(out_path + '.txt', 'w') as t:
-            print("Writing results to text file.")
+        with open(out_path, 'w') as t:
+            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -426,8 +427,8 @@ class DiffPropResults:
         Write difference in proportions results to file.
         """
 
-        with open(out_path + '.txt', 'w') as t:
-            print("Writing results to text file.")
+        with open(out_path, 'w') as t:
+            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -451,6 +452,31 @@ class DiffPropResults:
                     "Critical: {0}\n"
                     .format(str(self.d['Critical']))
                 )
+
+
+class ScoreMatResults:
+
+    def __init__(self, d, y, key_list):
+
+        self.d = d
+        self.y = y
+        self.key_list = key_list
+
+    def debug_key_list(self):
+
+        print("Key list: {}".format(", ".join(k for k in self.key_list)))
+
+    def debug_year_list(self):
+
+        print("Year list: {}".format(", ".join(y for y in self.y)))
+
+    def write_to_json(self, out_path):
+
+        self.d["__KEY_LIST__"] = self.key_list
+        self.d["__YEAR_LIST__"] = self.y
+
+        with open(out_path, 'w', encoding='utf8') as out_file:
+            out_file.write(json.dumps(self.d, indent=4, ensure_ascii=False))
 
 
 class TfidfAuthorClusters:
