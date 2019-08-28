@@ -483,16 +483,8 @@ class ScoreMatResults(Results):
         Write TF-IDF scores data to file.
         """
 
-        ret = {
-            "scores": self.d,
-            "metadata": {
-                "KEYS": self.k,
-                "YEARS": self.y
-            }
-        }
-
         with open(out_path, 'w', encoding='utf8') as out_file:
-            out_file.write(json.dumps(ret, indent=4, ensure_ascii=False))
+            out_file.write(json.dumps(self.d, indent=4, ensure_ascii=False))
 
 
 class TfidfAuthorClusters:

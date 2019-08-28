@@ -4,7 +4,6 @@ import pickle
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 
-from corpus.results import *
 from corpus.clusters.cluster import *
 
 
@@ -369,29 +368,30 @@ class Tfidf:
         if self.author_dict is None:
             self.partition_by_author()
 
-        ret = {"scores": {}, "metadata": {"KEYS": key_list, "YEARS": self.author_dict.keys()}}
+        ret = {"scores": {}, "metadata": {"KEYS": key_list, "YEARS": list(self.author_dict.keys())}}
 
         for y in self.author_dict.keys():
-            ret["scores"][y] = []
+            ret["scores"][y] = {}
 
             print("Building TF-IDF scores dictionary for period {}".format(str(y)))
-            for a in tqdm.tqdm(sorted(self.author_dict[y].keys())):
+            for a in tqdm.tqdm(self.author_dict[y].keys()):
 
-                word_scores = {}
+                ret["scores"][y][a] = {}
                 tf_idf_doc = self.tf_idf_models[y][self.author_dict[y][a]]
 
+                # loop over all words in tf-idf model, add word score to record if it matches a keyword
                 for t in tf_idf_doc:
 
                     id_to_word = self.word_to_id[y].get(t[0])
 
                     if id_to_word in key_list:
-                        word_scores[id_to_word] = t[1]
+                        ret["scores"][y][a][id_to_word] = t[1]
 
+                # loop over key list and assign word score to 0 if it wasn't in the tf-idf model
                 for k in key_list:
-                    if k not in word_scores:
-                        word_scores[k] = 0
 
-                ret["scores"][y].append(word_scores)
+                    if k not in ret["scores"][y][a]:
+                        ret["scores"][y][a][k] = 0
 
         return ScoreMatResults(ret)
 
