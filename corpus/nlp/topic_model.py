@@ -164,7 +164,7 @@ class TopicModel:
 
         return self
 
-    def lsi_model(self, num_topics: int=10, stochastic: bool = False):
+    def lsi_model(self, num_topics: int = 10, stochastic: bool = False):
         """
         Construct LSI topic models for each year in a
         corpus, given a set of parameters.
