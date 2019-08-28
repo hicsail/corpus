@@ -168,7 +168,7 @@ class Frequency:
 
         return self
 
-    def set_frequency_record(self, keys):
+    def set_frequency_record(self):
         """
         Calculate frequency distributions per period.
         """
