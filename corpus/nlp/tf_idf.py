@@ -1,10 +1,11 @@
 import tqdm
-import re
+import pickle
 
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 
 from corpus.results import *
+from corpus.clusters.cluster import *
 
 
 class Tfidf:
@@ -128,6 +129,8 @@ class Tfidf:
         os.mkdir("{0}/{1}".format(out_dir, 'tfidf'))
         os.mkdir("{0}/{1}".format(out_dir, 'dictionaries'))
 
+        print("Saving TF-IDF models to {}".format(out_dir))
+
         for year in self.year_list:
 
             model = self.tf_idf_models[year]
@@ -143,6 +146,8 @@ class Tfidf:
 
         self.tf_idf_models = {}
         self.word_to_id = {}
+
+        print("Loading TF-IDF models from {}".format(in_dir))
 
         for year in self.year_list:
             self.tf_idf_models[year] = TfidfModel.load("{0}/tfidf/{1}".format(in_dir, str(year)))
@@ -244,6 +249,9 @@ class Tfidf:
 
     @staticmethod
     def _cleanup_author_dict(doc_to_bow_list):
+        """
+        Merge single list of d2b scores.
+        """
 
         ret = {}
 
@@ -258,6 +266,9 @@ class Tfidf:
         return [(k, ret[k]) for k in ret.keys()]
 
     def cleanup_author_dict(self, author_dict):
+        """
+        Iterate over author_dict and merge d2b scores.
+        """
 
         for k in author_dict.keys():
             for kk in author_dict[k].keys():
@@ -268,6 +279,9 @@ class Tfidf:
         return author_dict
 
     def _partition_by_author(self, k, json_data, author_dict):
+        """
+        Helper method, update author_dict with a single document.
+        """
 
         year = int(json_data[k][self.date_key])
 
@@ -286,6 +300,9 @@ class Tfidf:
                 author_dict[target][author] = d2b
 
     def partition_by_author(self):
+        """
+        Within each year period, partition corpus by each author.
+        """
 
         if self.tf_idf_models is None:
             self.build_tf_idf_models()
@@ -314,4 +331,75 @@ class Tfidf:
 
         return self
 
+    def save_author_partition(self, out_dir):
+        """
+        Serialize author_dict to disk.
+        """
 
+        print("Saving author partition to {}/author_partition.p".format(out_dir))
+
+        with open("{}/author_partition.p".format(out_dir), 'wb') as outfile:
+
+            pickle.dump(self.author_dict, outfile)
+
+    def load_author_partition(self, in_dir):
+        """
+        Load precomputed author_dict
+        """
+
+        print("Loading precomputed author partition from {}/author_partition.p".format(in_dir))
+
+        with open("{}/author_partition.p".format(in_dir), 'rb') as infile:
+
+            self.author_dict = pickle.load(infile)
+
+        return self
+
+    def setup_scores_dict(self, key_list):
+        """
+        For each year period & author, take TF-IDF scores for each keyword.
+        """
+
+        if self.word_to_id is None or self.corpora is None:
+            self.build_dictionaries_and_corpora()
+
+        if self.tf_idf_models is None:
+            self.build_tf_idf_models()
+
+        ret = {}
+
+        print("Building TF-IDF scores dictionary.\n")
+        for y in self.author_dict.keys():
+            ret[y] = []
+
+            for a in sorted(self.author_dict[y].keys()):
+
+                word_scores = {}
+                tf_idf_doc = self.tf_idf_models[y][self.author_dict[y][a]]
+
+                for t in tf_idf_doc:
+
+                    id_to_word = self.word_to_id[y].get(t[0])
+
+                    if id_to_word in key_list:
+                        word_scores[id_to_word] = t[1]
+
+                for k in key_list:
+                    if k not in word_scores:
+                        word_scores[k] = 0
+
+                ret[y].append(word_scores)
+
+        return ScoreMatResults(ret, self.year_list, key_list)
+
+    def cluster_k_means(self, key_list):
+
+        scores_dict = self.setup_scores_dict(key_list)
+
+        return KMeansAuthorCluster(scores_dict)
+
+    def cluster_hierarchical(self, key_list):
+
+        scores_dict = self.setup_scores_dict(key_list)
+
+        return HierarchicalAuthorCluster(scores_dict)
