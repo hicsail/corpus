@@ -36,5 +36,6 @@ if __name__ == '__main__':
     # for r in results:
     #     r.display()
 
-    ad = tfidf.partition_by_author()
-    sd = tfidf.setup_scores_dict(["hi", "cat", "mat", "__www___"])
+    ck = tfidf.cluster_k_means(["hi", "cat", "mat", "__www__"])
+
+    print("HI")

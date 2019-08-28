@@ -366,13 +366,16 @@ class Tfidf:
         if self.tf_idf_models is None:
             self.build_tf_idf_models()
 
-        ret = {}
+        if self.author_dict is None:
+            self.partition_by_author()
 
-        print("Building TF-IDF scores dictionary.\n")
+        ret = {"scores": {}, "metadata": {"KEYS": key_list, "YEARS": self.author_dict.keys()}}
+
         for y in self.author_dict.keys():
-            ret[y] = []
+            ret["scores"][y] = []
 
-            for a in sorted(self.author_dict[y].keys()):
+            print("Building TF-IDF scores dictionary for period {}".format(str(y)))
+            for a in tqdm.tqdm(sorted(self.author_dict[y].keys())):
 
                 word_scores = {}
                 tf_idf_doc = self.tf_idf_models[y][self.author_dict[y][a]]
@@ -388,9 +391,9 @@ class Tfidf:
                     if k not in word_scores:
                         word_scores[k] = 0
 
-                ret[y].append(word_scores)
+                ret["scores"][y].append(word_scores)
 
-        return ScoreMatResults(ret, self.year_list, key_list)
+        return ScoreMatResults(ret)
 
     def cluster_k_means(self, key_list):
 

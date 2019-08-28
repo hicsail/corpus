@@ -12,7 +12,7 @@ class Results:
     Base class for all Results objects.
     """
 
-    def __init__(self, d: dict, n: dict):
+    def __init__(self, d: [dict, str], n: dict):
 
         self.d = d
         self.n = n
@@ -20,7 +20,7 @@ class Results:
 
 class FrequencyResults(Results):
     """
-    Data structure that stores word frequency results over a list of keywords.
+    Stores word frequency results over a list of keywords.
     """
 
     def __init__(self, d: dict, n: dict, f_type: str, name: str):
@@ -147,7 +147,7 @@ class FrequencyResults(Results):
 
 class TopResults(Results):
     """
-    Data structure that stores top word frequencies across a corpus.
+    Stores top word frequencies across a corpus.
     """
 
     def __init__(self, d: dict, n: dict, name: str):
@@ -383,15 +383,17 @@ class TopicResults(Results):
                         idx += 1
 
 
-class DiffPropResults:
+class DiffPropResults(Results):
     """
     Stores difference in proportions metrics between two corpora.
+
+    # TODO: fill out num_docs (n) parameter
     """
 
     def __init__(self, d: dict, year_list: list, name: str):
 
+        super(DiffPropResults, self).__init__(d, {})
         self.name = name
-        self.d = d
         self.years = year_list
 
     def display(self):
@@ -454,29 +456,43 @@ class DiffPropResults:
                 )
 
 
-class ScoreMatResults:
+class ScoreMatResults(Results):
+    """
+    Stores data that gets fed to clustering classes.
 
-    def __init__(self, d, y, key_list):
+    # TODO: fill out num_docs (n) parameter
+    """
 
-        self.d = d
-        self.y = y
-        self.key_list = key_list
+    def __init__(self, d):
+
+        super(ScoreMatResults, self).__init__(d, {})
+
+        self.y = self.d["metadata"]["YEARS"]
+        self.k = self.d["metadata"]["KEYS"]
 
     def debug_key_list(self):
 
-        print("Key list: {}".format(", ".join(k for k in self.key_list)))
+        print("Key list: {}".format(", ".join(k for k in self.k)))
 
     def debug_year_list(self):
 
-        print("Year list: {}".format(", ".join(y for y in self.y)))
+        print("Year list: {}".format(", ".join(self.y)))
 
     def write_to_json(self, out_path):
+        """
+        Write TF-IDF scores data to file.
+        """
 
-        self.d["__KEY_LIST__"] = self.key_list
-        self.d["__YEAR_LIST__"] = self.y
+        ret = {
+            "scores": self.d,
+            "metadata": {
+                "KEYS": self.k,
+                "YEARS": self.y
+            }
+        }
 
         with open(out_path, 'w', encoding='utf8') as out_file:
-            out_file.write(json.dumps(self.d, indent=4, ensure_ascii=False))
+            out_file.write(json.dumps(ret, indent=4, ensure_ascii=False))
 
 
 class TfidfAuthorClusters:
