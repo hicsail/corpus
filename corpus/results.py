@@ -87,8 +87,8 @@ class FrequencyResults(Results):
         Write contents of FrequencyResults object to file.
         """
 
+        print("Writing results to file.")
         with open(out_path, 'w') as t:
-            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -172,8 +172,8 @@ class TopResults(Results):
         Write contents of Frequency object to file.
         """
 
+        print("Writing results to file.")
         with open(out_path, 'w') as t:
-            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -242,8 +242,8 @@ class TfidfResults(Results):
         Write contents of Tfidf object to file.
         """
 
+        print("Writing results to file.")
         with open(out_path, 'w') as t:
-            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -354,8 +354,8 @@ class TopicResults(Results):
         Write contents of LdaResults object to file.
         """
 
+        print("Writing results to file.")
         with open(out_path, 'w') as t:
-            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -430,8 +430,8 @@ class DiffPropResults(Results):
         Write difference in proportions results to file.
         """
 
+        print("Writing results to file.")
         with open(out_path, 'w') as t:
-            print("Writing results to file.")
 
             for i in range(len(self.years) - 1):
                 t.write(
@@ -491,20 +491,23 @@ class ScoreMatResults(Results):
 class ClusterResults:
     """
     Encapsulates graphed cluster objects.
-
-    TODO: write author clusters to file and all that
     """
 
-    def __init__(self, l, t, a, o):
+    def __init__(self, l, t, a, o, k):
 
         self.labels = l
         self.tsne = t
         self.authors_dict = a
         self.omitted = o
+        self.key_list = k
 
-        self.graphs = self.graph_results()
+        self.graphs = None
+        self.authors_grouped = None
 
     def graph_results(self):
+        """
+        Initialize GraphClusters objects for each year period.
+        """
 
         ret = {}
 
@@ -512,54 +515,72 @@ class ClusterResults:
 
             ret[y] = GraphClusters(self.tsne[y], self.labels[y], title="Clustering Result for period: {}".format(y))
 
-        return ret
+        self.graphs = ret
+
+        return self
+
+    def group_authors(self):
+        """
+        Group authors into their respective cluster groups per year period.
+        """
+
+        ret = {}
+
+        for y in self.authors_dict.keys():
+
+            author_group = self.authors_dict[y]
+
+            if len(author_group) > 0:
+
+                ret[y] = {}
+
+                for i in range(len(author_group)):
+
+                    label = self.labels[y][i] + 1
+                    author = author_group[i]
+
+                    try:
+                        ret[y][label].append(author)
+
+                    except KeyError:
+                        ret[y][label] = [author]
+
+        self.authors_grouped = ret
+
+        return self
+
+    def write_cluster_groups(self, out_path):
+        """
+        Write authors grouped by cluster ID to file.
+        """
+
+        if self.authors_grouped is None:
+            self.group_authors()
+
+        with open(out_path, 'w') as t:
+
+            for y in self.authors_grouped.keys():
+
+                t.write("\nYear Period beginning: {}\n".format(str(y)))
+
+                for a in sorted(self.authors_grouped[y].keys()):
+                    t.write("\n\tCluster: {}\n\n".format(str(a)))
+
+                    for aa in self.authors_grouped[y][a]:
+                        t.write("\t\t{}\n".format(aa))
 
     def save_results(self, out_dir):
         """
         Save cluster figures to a directory.
         """
 
+        if self.graphs is None:
+            self.graph_results()
+
         build_out(out_dir)
 
         for y in self.graphs.keys():
+
+            # have to create & save bc subsequent plots will overwrite past plots
             self.graphs[y].create_plot()
             self.graphs[y].save("{0}/{1}.png".format(out_dir, str(y)))
-
-
-class TfidfAuthorClusters:
-    """
-    clustering results
-    """
-
-    def __init__(self, author_keywords_score_mat: np.ndarray, authors: list, keywords: list, cluster_labels: list,
-                 zero_authors: list):
-
-        self.author_keywords_score_mat = author_keywords_score_mat
-        self.authors = authors
-        self.keywords = keywords
-        self.cluster_labels = cluster_labels
-        self.zero_authors = zero_authors
-
-        assert len(authors) == len(cluster_labels)
-
-    def _cluster_authors(self):
-        clustered_authors_dict = defaultdict(list)
-        for k, v in zip(self.cluster_labels, self.authors):
-            clustered_authors_dict[k].append(v)
-        return clustered_authors_dict
-
-    # TODO: may add some stats later?
-    def write_authors_clustered(self, out_path: str, name: str):
-        """
-        :param out_path: the output file
-        :param name: name of the clustering method
-        """
-
-        clustered_authors_dict = OrderedDict(sorted(self._cluster_authors().items()))
-
-        with open(out_path, 'w') as t:
-            print("Writing results to text file.")
-            t.write("Clustered by {0}\n".format(name))
-            t.write("Authors not used any key words:\n\t{0}\n".format(self.zero_authors))
-            for key, val in clustered_authors_dict.items():
-                t.write("Group {0}:\n\t{1}\n".format(key, val))

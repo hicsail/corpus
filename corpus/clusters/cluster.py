@@ -6,6 +6,9 @@ from corpus.results import *
 
 
 class AuthorCluster:
+    """
+    Base class for author-partitioned corpus clusters.
+    """
 
     def __init__(self, scores_record: [str, ScoreMatResults]):
 
@@ -28,6 +31,9 @@ class AuthorCluster:
         self.tsne = self.compute_tsne()
 
     def load_scores_from_file(self, path):
+        """
+        Load dictionary that stores author matrices from JSON file.
+        """
 
         with open(path, 'r', encoding='utf8') as in_file:
 
@@ -104,12 +110,18 @@ class AuthorCluster:
 
 
 class KMeansAuthorCluster(AuthorCluster):
+    """
+    K Means clustering for author-partitioned corpus clusters.
+    """
 
     def __init__(self, scores_record):
 
         super(KMeansAuthorCluster, self).__init__(scores_record)
 
     def generate_num_clusters(self):
+        """
+        Generate ideal number of clusters for K Means.
+        """
 
         ret = {}
 
@@ -133,6 +145,9 @@ class KMeansAuthorCluster(AuthorCluster):
         return ret
 
     def _cluster(self, num_clusters_dict: dict):
+        """
+        Populate cluster labels dictionary for each year period.
+        """
 
         ret = {}
 
@@ -141,9 +156,12 @@ class KMeansAuthorCluster(AuthorCluster):
             c.fit(self.nonzero_mat[y])
             ret[y] = c.predict(self.nonzero_mat[y])
 
-        return ClusterResults(ret, self.tsne, self.nonzero_authors, self.omitted_authors)
+        return ret
 
     def _dict_from_clusters_list(self, num_clusters_list: list):
+        """
+        Read number of clusters per year period from list.
+        """
 
         ret = {}
 
@@ -156,6 +174,9 @@ class KMeansAuthorCluster(AuthorCluster):
         return ret
 
     def fit_cluster(self, num_clusters: [list, None] = None):
+        """
+        Fit K Means cluster and return ClusterResults object.
+        """
 
         if num_clusters is None:
             num_clusters_dict = self.generate_num_clusters()
@@ -163,10 +184,15 @@ class KMeansAuthorCluster(AuthorCluster):
         else:
             num_clusters_dict = self._dict_from_clusters_list(num_clusters)
 
-        return self._cluster(num_clusters_dict)
+        labels = self._cluster(num_clusters_dict)
+
+        return ClusterResults(labels, self.tsne, self.nonzero_authors, self.omitted_authors, self.key_list)
 
 
 class HierarchicalAuthorCluster(AuthorCluster):
+    """
+    Hierarchical clustering for author-partitioned corpus clusters.
+    """
 
     def __init__(self, scores_record):
 
