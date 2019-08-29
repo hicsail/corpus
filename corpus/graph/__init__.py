@@ -335,28 +335,31 @@ class GraphClusters:
     visualize clustering results after applying dimension reduction to 2D
     """
 
-    def __init__(self, data_2d: np.ndarray, title: str):
+    def __init__(self, data_2d: np.ndarray, cluster_labels: list, title: str):
         plt.close('all')
         self.data_2d = data_2d
         self.title = title
+        self.cluster_labels = cluster_labels
 
         self.fig = None
         self.plt = None
 
-    def show_plot(self, cluster_labels: [list, None] = None):
+        self.show_plot()
+
+    def show_plot(self):
         """
         generate a colormap according to the clustering result and plot
         """
         # setup the plot
         fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-        if cluster_labels is not None:
-            n = len(set(cluster_labels))
+        if self.cluster_labels is not None:
+            n = len(set(self.cluster_labels))
             cmap = plt.get_cmap('jet', n)
             # define the bins and normalize
             bounds = np.linspace(0, n, n + 1)
             norm = c.BoundaryNorm(bounds, cmap.N)
             # the plot
-            scat = ax.scatter(self.data_2d[:, 0], self.data_2d[:, 1], c=cluster_labels, cmap=cmap, norm=norm)
+            scat = ax.scatter(self.data_2d[:, 0], self.data_2d[:, 1], c=self.cluster_labels, cmap=cmap, norm=norm)
             # the colorbar
             cb = plt.colorbar(scat, drawedges=True)
             cb.set_label('Group Number')
@@ -372,9 +375,9 @@ class GraphClusters:
         ax.set_title(self.title)
 
         self.plt = plt
-        self.plt.ion()
-        self.plt.pause(0.01)
-        self.plt.show()
+        # self.plt.ion()
+        # self.plt.pause(0.01)
+        # self.plt.show()
 
     def save(self, out_path: str):
         """

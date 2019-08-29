@@ -25,7 +25,7 @@ class AuthorCluster:
         self.nonzero_authors = params["NONZERO_AUTHORS"]
         self.nonzero_mat = params["NONZERO_MAT"]
         self.omitted_authors = params["OMITTED_AUTHORS"]
-        self.tsne = None
+        self.tsne = self.compute_tsne()
 
     def load_scores_from_file(self, path):
 
@@ -100,9 +100,7 @@ class AuthorCluster:
                 tsne = manifold.TSNE(n_components=2, init='pca', random_state=0)
                 ret[y] = tsne.fit_transform(self.nonzero_mat[y])
 
-        self.tsne = ret
-
-        return self
+        return ret
 
 
 class KMeansAuthorCluster(AuthorCluster):
@@ -143,21 +141,7 @@ class KMeansAuthorCluster(AuthorCluster):
             c.fit(self.nonzero_mat[y])
             ret[y] = c.predict(self.nonzero_mat[y])
 
-        return ret
-
-    def _cluster_tsne(self, num_clusters_dict: dict):
-
-        ret = {}
-
-        if self.tsne is None:
-            self.compute_tsne()
-
-        for y in num_clusters_dict.keys():
-            c = KMeans(n_clusters=num_clusters_dict[y])
-            c.fit(self.tsne[y])
-            ret[y] = c.predict(self.tsne[y])
-
-        return ret
+        return ClusterResults(ret, self.tsne, self.nonzero_authors, self.omitted_authors)
 
     def _dict_from_clusters_list(self, num_clusters_list: list):
 
@@ -171,7 +155,7 @@ class KMeansAuthorCluster(AuthorCluster):
 
         return ret
 
-    def cluster(self, num_clusters: [list, None] = None, with_tsne: [bool, None] = True):
+    def cluster(self, num_clusters: [list, None] = None):
 
         if num_clusters is None:
             num_clusters_dict = self.generate_num_clusters()
@@ -179,11 +163,7 @@ class KMeansAuthorCluster(AuthorCluster):
         else:
             num_clusters_dict = self._dict_from_clusters_list(num_clusters)
 
-        if with_tsne:
-            return self._cluster_tsne(num_clusters_dict)
-
-        else:
-            return self._cluster(num_clusters_dict)
+        return self._cluster(num_clusters_dict)
 
 
 class HierarchicalAuthorCluster(AuthorCluster):

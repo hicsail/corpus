@@ -5,6 +5,7 @@ import re
 from collections import defaultdict, OrderedDict
 
 from corpus.utils import *
+from corpus.graph import GraphClusters
 
 
 class Results:
@@ -485,6 +486,39 @@ class ScoreMatResults(Results):
 
         with open(out_path, 'w', encoding='utf8') as out_file:
             out_file.write(json.dumps(self.d, indent=4, ensure_ascii=False))
+
+
+class ClusterResults:
+    """
+    TODO: build out dir and save figures to it
+    """
+
+    def __init__(self, l, t, a, o):
+
+        self.labels = l
+        self.tsne = t
+        self.authors_dict = a
+        self.omitted = o
+
+        self.graphs = self.graph_results()
+
+    def graph_results(self):
+
+        ret = {}
+
+        for y in self.tsne.keys():
+
+            ret[y] = GraphClusters(self.tsne[y], self.labels[y], title="Clustering Result for period: {}".format(y))
+
+        return ret
+
+    def save_results(self, out_dir):
+
+        build_out(out_dir)
+
+        for y in self.graphs.keys():
+            self.graphs[y].save("{0}/{1}.png".format(out_dir, str(y)))
+
 
 
 class TfidfAuthorClusters:
