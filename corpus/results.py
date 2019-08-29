@@ -490,7 +490,9 @@ class ScoreMatResults(Results):
 
 class ClusterResults:
     """
-    TODO: build out dir and save figures to it
+    Encapsulates graphed cluster objects.
+
+    TODO: write author clusters to file and all that
     """
 
     def __init__(self, l, t, a, o):
@@ -513,12 +515,15 @@ class ClusterResults:
         return ret
 
     def save_results(self, out_dir):
+        """
+        Save cluster figures to a directory.
+        """
 
         build_out(out_dir)
 
         for y in self.graphs.keys():
+            self.graphs[y].create_plot()
             self.graphs[y].save("{0}/{1}.png".format(out_dir, str(y)))
-
 
 
 class TfidfAuthorClusters:

@@ -1,7 +1,7 @@
 import os
+import sys
 import shutil
 
-from prompt_toolkit import prompt
 from nltk.stem.snowball import SnowballStemmer
 from gensim import corpora
 
@@ -12,7 +12,7 @@ def _fail(msg: str):
     """
 
     print(msg)
-    os._exit(1)
+    sys.exit()
 
 
 def build_keys(keys: list):
@@ -36,14 +36,12 @@ def num_dict(alist: list, keywords: [list, None]=None, nested: [int, None]=0):
         if nested == 0:
             results[item] = 0
 
-        elif nested == 1:
+        else:
             results[item] = {}
             results[item]['TOTAL'] = 0
+
             for keyword in keywords:
                 results[item][keyword] = 0
-
-        else:
-            _fail('Shouldn\'t be able to get here.')
 
     return results
 
@@ -74,14 +72,12 @@ def list_dict(alist: list, keywords: [list, None] = None, nested: [None, int] = 
         if nested == 0:
             results[item] = []
 
-        elif nested == 1:
+        else:
             results[item] = {}
+
             for keyword in keywords:
                 results[item]['TOTAL'] = []
                 results[item][keyword] = []
-
-        else:
-            _fail('Shouldn\'t be able to get here.')
 
     return results
 
@@ -111,7 +107,7 @@ def determine_year(year: int, year_list: list):
         if year_list[i] <= year < year_list[i + 1]:
             return year_list[i]
 
-    _fail("{} is not in range".format(year))
+    raise Exception("{} is not in range".format(year))
 
 
 def stem(word: str, language: [str, None] = 'english'):
@@ -122,37 +118,25 @@ def stem(word: str, language: [str, None] = 'english'):
     try:
         s = SnowballStemmer(language.lower())
     except ValueError:
-        _fail("{} is not supported, please enter a valid language.".format(language))
+        raise Exception("{} is not supported, please enter a valid language.".format(language))
 
     stemmed = s.stem(word.lower())
 
     return '{0}: {1}'.format(word, stemmed)
 
 
-# TODO: ask user if they want to overwrite directory or add to it, if it exists --DONE
 def build_out(out_dir: str):
     """
     Build output directory, overwrite if it exists.
     """
 
     if out_dir is not None:
+
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)
-        else:
-            while True:
-                ans = prompt("\nDirectory already exists. Do you want to overwrite[O] or add[A] to it?    ")
-                if ans == 'O':
-                    print("overwrite...")
-                    shutil.rmtree(out_dir)
-                    os.mkdir(out_dir)
-                    break
-                elif ans == 'A':
-                    print("add to...")
-                    # do nothing
-                    break
-                else:
-                    print("Command not recognized.")
-                    continue
 
+        else:
+            shutil.rmtree(out_dir)
+            os.mkdir(out_dir)
     else:
-        _fail("Please specify output directory.")
+        raise Exception("Specify an output directory.\n")

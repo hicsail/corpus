@@ -155,7 +155,7 @@ class KMeansAuthorCluster(AuthorCluster):
 
         return ret
 
-    def cluster(self, num_clusters: [list, None] = None):
+    def fit_cluster(self, num_clusters: [list, None] = None):
 
         if num_clusters is None:
             num_clusters_dict = self.generate_num_clusters()
