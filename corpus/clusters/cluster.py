@@ -1,6 +1,10 @@
 from sklearn.cluster import KMeans
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 from sklearn import manifold
 from kneed import KneeLocator
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 from corpus.results import *
 
@@ -28,6 +32,7 @@ class AuthorCluster:
         self.nonzero_authors = params["NONZERO_AUTHORS"]
         self.nonzero_mat = params["NONZERO_MAT"]
         self.omitted_authors = params["OMITTED_AUTHORS"]
+
         self.tsne = self.compute_tsne()
 
     def load_scores_from_file(self, path):
@@ -108,6 +113,20 @@ class AuthorCluster:
 
         return ret
 
+    def _dict_from_clusters_list(self, num_clusters_list: list):
+        """
+        Read number of clusters per year period from list.
+        """
+
+        ret = {}
+
+        mat_keys = list(self.nonzero_mat.keys())
+
+        for i in range(len(mat_keys) - 1):
+            ret[mat_keys[i]] = num_clusters_list[i]
+
+        return ret
+
 
 class KMeansAuthorCluster(AuthorCluster):
     """
@@ -135,6 +154,7 @@ class KMeansAuthorCluster(AuthorCluster):
                 errors = np.zeros(max_ks-1)
 
                 for k in all_ks:
+
                     temp_kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
                     temp_kmeans.fit_predict(self.nonzero_mat[y])
                     errors[k-1] = temp_kmeans.inertia_
@@ -152,28 +172,14 @@ class KMeansAuthorCluster(AuthorCluster):
         ret = {}
 
         for y in num_clusters_dict.keys():
+
             c = KMeans(n_clusters=num_clusters_dict[y])
             c.fit(self.nonzero_mat[y])
             ret[y] = c.predict(self.nonzero_mat[y])
 
         return ret
 
-    def _dict_from_clusters_list(self, num_clusters_list: list):
-        """
-        Read number of clusters per year period from list.
-        """
-
-        ret = {}
-
-        mat_keys = list(self.nonzero_mat.keys())
-
-        for i in range(len(mat_keys) - 1):
-
-            ret[mat_keys[i]] = num_clusters_list[i]
-
-        return ret
-
-    def fit_cluster(self, num_clusters: [list, None] = None):
+    def fit_clusters(self, num_clusters: [list, None] = None):
         """
         Fit K Means cluster and return ClusterResults object.
         """
@@ -198,3 +204,81 @@ class HierarchicalAuthorCluster(AuthorCluster):
 
         super(HierarchicalAuthorCluster, self).__init__(scores_record)
 
+        self.z = None
+
+    def set_z(self, method: [str, None] = 'ward'):
+        """
+        Set Z values for each year period.
+        """
+
+        ret = {}
+
+        for y in self.nonzero_mat.keys():
+
+            # filter out empty entries
+            if len(self.nonzero_mat[y]) > 0:
+
+                nonzero_np = np.array([np.array(i) for i in self.nonzero_mat[y]])
+                ret[y] = linkage(nonzero_np, method=method)
+
+        self.z = ret
+
+        return self
+
+    def _cluster(self, cutoffs_dict):
+        """
+        Compute cluster labels for each year period.
+        """
+
+        ret = {}
+
+        for y in self.nonzero_mat.keys():
+
+            # filter out empty entries
+            if len(self.nonzero_mat[y]) > 0:
+                ret[y] = fcluster(self.z[y], cutoffs_dict[y], 'distance')
+
+        return ret
+
+    def fit_clusters(self, cutoffs_list: list):
+        """
+        Fit Hierarchical cluster and return ClusterResults object.
+        """
+
+        if self.z is None:
+            self.set_z()
+
+        num_clusters_dict = self._dict_from_clusters_list(cutoffs_list)
+        labels = self._cluster(num_clusters_dict)
+
+        return ClusterResults(labels, self.tsne, self.nonzero_authors, self.omitted_authors, self.key_list)
+
+    def _generate_dendrograms(self, out_dir, y):
+        """
+        Generate dendrogram plot and save to file.
+        """
+
+        authors_np = np.array([np.array(i) for i in self.nonzero_authors[y]])
+
+        figlen = len(self.nonzero_mat[y]) / 9
+        fig = plt.figure(figsize=(15, figlen))
+
+        # matplotlib is awful
+        dn = dendrogram(self.z[y], orientation='left', labels=authors_np, leaf_font_size=9)
+
+        plt.tight_layout()
+        plt.savefig("{0}/{1}".format(out_dir, str(y)), dpi=200)
+
+    def generate_dendrograms(self, out_dir):
+        """
+        Generate all dendrogram plots and save to directory.
+        """
+
+        if self.z is None:
+            self.set_z()
+
+        for y in self.nonzero_mat.keys():
+
+            # filter out empty entries
+            if len(self.nonzero_mat[y]) > 0:
+                self._generate_dendrograms(out_dir, self.z[y])

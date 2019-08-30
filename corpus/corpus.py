@@ -1,9 +1,8 @@
-import sys
 import nltk
 import json
 import tqdm
 
-from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency, tf_idf_author
+from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency
 from corpus.utils import *
 
 
@@ -99,24 +98,6 @@ class Corpus:
         )
 
         return t
-
-    def tf_idf_author(self, name: str, out_dir: str, year_list: list, text_type: str = 'Text',
-                      date_key: [None, str] = "Date", stop_words: [list, set, None] = None):
-        """
-        Get TF-IDF scores for authors w/r/t all words within a corpus.
-        """
-
-        ta = tf_idf_author.TfidfAuthor(
-            name,
-            self.in_dir,
-            out_dir,
-            text_type,
-            year_list,
-            date_key,
-            stop_words
-        )
-
-        return ta
 
     def raw_frequency(self, name: str,  key_list: list, text_type: str = 'Text', binary: bool = False):
         """

@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import json
 
 from nltk.stem.snowball import SnowballStemmer
 from gensim import corpora
@@ -23,7 +24,7 @@ def build_keys(keys: list):
     return [tuple(k.split()) for k in keys]
 
 
-def num_dict(alist: list, keywords: [list, None]=None, nested: [int, None]=0):
+def num_dict(alist: list, keywords: [list, None] = None, nested: [int, None] = 0):
     """
     Build empty dictionary with integers at leaf entries.
     alist: year_list or author_list
@@ -140,3 +141,29 @@ def build_out(out_dir: str):
             os.mkdir(out_dir)
     else:
         raise Exception("Specify an output directory.\n")
+
+
+def stop_words_from_json(file_path: str):
+    """
+    Set stop_words from Json file.
+    """
+
+    print("Loading stop words from JSON file at {}".format(file_path))
+
+    with open(file_path, 'r', encoding='utf8') as in_file:
+
+        json_data = json.load(in_file)
+        return set(json_data['Words'])
+
+
+def setup_stop_words(stop_words):
+
+    if stop_words is not None:
+        if isinstance(stop_words, str):
+            return stop_words_from_json(stop_words)
+        elif isinstance(stop_words, list):
+            return set(stop_words)
+        else:
+            return stop_words
+    else:
+        return {}

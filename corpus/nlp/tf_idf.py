@@ -5,6 +5,7 @@ from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 
 from corpus.clusters.cluster import *
+from corpus.results import *
 
 
 class Tfidf:
@@ -22,39 +23,12 @@ class Tfidf:
         self.text_type = text_type
         self.year_list = year_list
         self.date_key = date_key
-        self.stop_words = self.setup_stop_words(stop_words)
+        self.stop_words = setup_stop_words(stop_words)
 
         self.tf_idf_models = None
         self.word_to_id = None
         self.corpora = None
         self.author_dict = None
-
-    def setup_stop_words(self, stop_words):
-
-        if stop_words is not None:
-            if isinstance(stop_words, str):
-                return self.stop_words_from_json(stop_words)
-            elif isinstance(stop_words, list):
-                return set(stop_words)
-            else:
-                return stop_words
-        else:
-            return {}
-
-    @staticmethod
-    def stop_words_from_json(file_path: str):
-        """
-        Set stop_words from Json file.
-        """
-
-        print("Loading stop words from JSON file at {}".format(file_path))
-
-        with open(file_path, 'r', encoding='utf8') as in_file:
-
-            json_data = json.load(in_file)
-            stop_words = set(json_data['Words'])
-
-            return stop_words
 
     def _update_dictionaries_and_corpora(self, k, json_data, word_to_id_results, corpora_results):
         """

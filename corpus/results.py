@@ -1,11 +1,7 @@
-import numpy as np
-import json
 import re
 
-from collections import defaultdict, OrderedDict
-
 from corpus.utils import *
-from corpus.graph import GraphClusters
+from corpus.graph.clusters import GraphClusters
 
 
 class Results:
@@ -384,16 +380,14 @@ class TopicResults(Results):
                         idx += 1
 
 
-class DiffPropResults(Results):
+class DiffPropResults:
     """
     Stores difference in proportions metrics between two corpora.
-
-    # TODO: fill out num_docs (n) parameter
     """
 
     def __init__(self, d: dict, year_list: list, name: str):
 
-        super(DiffPropResults, self).__init__(d, {})
+        self.d = d
         self.name = name
         self.years = year_list
 
@@ -457,17 +451,14 @@ class DiffPropResults(Results):
                 )
 
 
-class ScoreMatResults(Results):
+class ScoreMatResults:
     """
     Stores data that gets fed to clustering classes.
-
-    # TODO: fill out num_docs (n) parameter
     """
 
     def __init__(self, d):
 
-        super(ScoreMatResults, self).__init__(d, {})
-
+        self.d = d
         self.y = self.d["metadata"]["YEARS"]
         self.k = self.d["metadata"]["KEYS"]
 
@@ -549,7 +540,7 @@ class ClusterResults:
 
         return self
 
-    def write_cluster_groups(self, out_path):
+    def write_cluster_groups(self, out_path: str):
         """
         Write authors grouped by cluster ID to file.
         """
@@ -569,7 +560,7 @@ class ClusterResults:
                     for aa in self.authors_grouped[y][a]:
                         t.write("\t\t{}\n".format(aa))
 
-    def save_results(self, out_dir):
+    def save_results(self, out_dir: str):
         """
         Save cluster figures to a directory.
         """
