@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from corpus import graph
+from corpus.graph.frequencies import GraphFrequency
 
 
 def setup_parser():
@@ -28,6 +28,6 @@ if __name__ == '__main__':
 
     paths = setup_filepaths(args.i)
 
-    g = graph.GraphFrequency(paths)\
+    g = GraphFrequency(paths)\
         .create_plot(total_only=args.t, title=args.title, bar_width=int(args.bar_width))\
         .show()

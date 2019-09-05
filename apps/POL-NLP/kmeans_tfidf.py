@@ -12,6 +12,7 @@ def setup_parser():
     parser.add_argument("-t", action="store", help="text field to analyze", default="Text")
     parser.add_argument("-y", action="store", help="year ranges")
     parser.add_argument("-o", action="store", help="output directory")
+    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Year Published")
 
     return parser.parse_args()
 
@@ -29,10 +30,11 @@ if __name__ == '__main__':
         'tfidf',
         [int(y) for y in args.y.split(",")],
         args.t,
+        date_key=args.d
     )
 
     ck = tfidf.cluster_k_means(["hi", "cat", "mat", "__www__"])
     clusters = ck.fit_clusters()
     clusters.save_results('/Users/ben/Desktop/kmeans_results/')
 
-    print("Done with tf_idf_and_k_means.py")
+    print("Done with kmeans_tfidf.py")
