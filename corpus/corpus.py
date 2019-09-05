@@ -1,5 +1,4 @@
 import nltk
-import json
 import tqdm
 
 from corpus.nlp import frequency, tf_idf, topic_model, raw_frequency
@@ -130,8 +129,8 @@ class Corpus:
 
         return t
 
-    def lda_model(self, name: str, year_list: list, text_type: str = 'Text',  date_key:str = "Date",
-                  num_topics: [int, None] = 10, passes: [int, None] = 1, seed: [int, None] = None,
+    def lda_model(self, name: str, year_list: list, text_type: str = 'Text', num_topics: [int, None] = 10,
+                  date_key: [str, None] = "Date", passes: [int, None] = 1, seed: [int, None] = None,
                   stop_words: [list, set, str, None] = None):
         """
         Build LDA Topic Models for each period within a corpus.
@@ -149,7 +148,7 @@ class Corpus:
         return t.lda_model(num_topics, passes, seed)
 
     def lsi_model(self, name: str, year_list: list, text_type: str = 'Text', num_topics: [int, None] = 10,
-                  stochastic=False, stop_words: [list, set, None] = None):
+                  stochastic=False, date_key: [str, None] = "Date", stop_words: [list, set, None] = None):
         """
         Build LSI Topic Models for each period within a corpus.
         """
@@ -159,7 +158,7 @@ class Corpus:
             self.in_dir,
             text_type,
             year_list,
-
+            date_key,
             stop_words
         )
 
@@ -219,11 +218,7 @@ class Corpus:
         amount of words around the occurrence.
         """
 
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-        else:
-            shutil.rmtree(output_dir)
-            os.mkdir(output_dir)
+        build_out(output_dir)
 
         if y_range is None:
             y_min = -1*sys.maxsize
@@ -238,23 +233,34 @@ class Corpus:
         key_list = build_keys(key_list)
 
         for subdir, dirs, files in os.walk(self.in_dir):
+
             print("Building sub-corpora.\n")
+
             for jsondoc in tqdm.tqdm(files):
                 if jsondoc[0] != ".":
+
                     with open(self.in_dir + "/" + jsondoc, 'r', encoding='utf8') as in_file:
+
                         index += 1
                         jsonfile = json.load(in_file)
+
                         for k in list(jsonfile.keys()):
+
                             jsondata = jsonfile[k]
                             year = int(jsondata[date_key])
+
                             if y_min <= year <= y_max:
+
                                 title = jsondata["Title"]
                                 author = jsondata["Author"]
                                 text = list(nltk.ngrams(jsondata[text_type], self.detect_n(key_list)))
+
                                 for i in range(len(text)):
                                     if text[i] in set(key_list):
+
                                         subindex += 1
                                         out_text = text[(i - int(doc_size/2)):(i + int(doc_size/2))]
+
                                         self._write_extract(
                                             output_dir, key_list, year, index,
                                             subindex, title, author, out_text

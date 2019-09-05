@@ -345,9 +345,10 @@ class Tfidf:
         ret = {"scores": {}, "metadata": {"KEYS": key_list, "YEARS": list(self.author_dict.keys())}}
 
         for y in self.author_dict.keys():
-            ret["scores"][y] = {}
 
+            ret["scores"][y] = {}
             print("Building TF-IDF scores dictionary for period {}".format(str(y)))
+
             for a in tqdm.tqdm(self.author_dict[y].keys()):
 
                 ret["scores"][y][a] = {}

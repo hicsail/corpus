@@ -10,6 +10,10 @@ class Frequency:
     to a list of year periods and (optionally) key words. Keywords
     can be either individual words or n-grams for any n, but must
     use a consistent value of n within a particular list.
+
+    TODO: need to store n-gram val with self.frequency record, detect n
+    with calls to take_freq, and recalculate self.frequency record if n
+    has changed
     """
 
     def __init__(self, name: str, in_dir: str, text_type: str, year_list: list,
@@ -52,7 +56,7 @@ class Frequency:
         """
 
         if self.frequency_record is None:
-            self.set_frequency_record()
+            raise Exception("No frequency record to write.\n")
 
         j_file = json.dumps(
             self.frequency_record,
@@ -144,7 +148,7 @@ class Frequency:
 
         return self
 
-    def set_frequency_record(self):
+    def set_frequency_record(self, n):
         """
         Calculate frequency distributions per period.
         """
@@ -152,8 +156,6 @@ class Frequency:
         frequency_lists = num_dict(self.year_list)
 
         print("Calculating frequency records.\n")
-
-        n = self.detect_n(keys)
 
         for subdir, dirs, files in os.walk(self.in_dir):
             for json_doc in tqdm.tqdm(files):
@@ -177,8 +179,10 @@ class Frequency:
         Calculate keyword frequencies for each period from frequency records
         """
 
+        n = self.detect_n(keys)
+
         if self.frequency_record is None:
-            self.set_frequency_record(keys)
+            self.set_frequency_record(n)
 
         num_docs = num_dict(self.year_list)
         freq = self.frequency_record
