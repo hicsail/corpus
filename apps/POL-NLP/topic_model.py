@@ -15,7 +15,7 @@ def setup_parser():
     parser.add_argument("-num_topics", action="store", help="number of topics", default=10),
     parser.add_argument("-passes", action="store", help="number of passes", default=1)
     parser.add_argument("-stop", action="store", help="path to stopwords file", default=None)
-    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Year Published")
+    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Date")
 
     return parser.parse_args()
 

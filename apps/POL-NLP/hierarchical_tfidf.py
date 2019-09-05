@@ -2,6 +2,10 @@ import argparse
 
 from corpus import corpus
 
+"""
+TODO: configurable thresholds
+"""
+
 
 def setup_parser():
 
@@ -12,7 +16,7 @@ def setup_parser():
     parser.add_argument("-t", action="store", help="text field to analyze", default="Text")
     parser.add_argument("-y", action="store", help="year ranges")
     parser.add_argument("-o", action="store", help="output directory")
-    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Year Published")
+    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Date")
 
     return parser.parse_args()
 
@@ -33,8 +37,10 @@ if __name__ == '__main__':
         date_key=args.d
     )
 
+    cutoffs = [.02 for i in range(len(args.y.split(",")) - 1)]
+
     ck = tfidf.cluster_hierarchical([k.lower() for k in args.k.split(",")])
-    clusters = ck.fit_clusters([.02, .02])
+    clusters = ck.fit_clusters(cutoffs)
     clusters.save_results(args.o)
 
     print("Done with hierarchical_tfidf.py")
