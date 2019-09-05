@@ -1,5 +1,5 @@
 ***
-###check_stem.py
+### check_stem.py
 
 purpose:
 
@@ -24,7 +24,7 @@ output:
 
 
 ***
-###debug_corpus.py
+### debug_corpus.py
 
 purpose:
 
@@ -61,7 +61,7 @@ output:
 
 
 ***
-###frequency.py
+### frequency.py
 
 purpose:
 
@@ -72,15 +72,14 @@ arguments:
 	-i : path to corpus directory
 	-o : output json file path
 	-k : list of keywords, separate each keyword by a comma
-	-t : text field to analyze (defaults to text)
-		- note : if you're running this script on an entire corpus, other text fields you might be interested in are the following -- 
-			Filtered, Stemmed, Filtered Stemmed
+	-t : text field to analyze (defaults to "Text")
+		- Note: if you're running this on sub-corpora, the default field is fine as there are no other fields.
 	-y : list of year periods
 	-n : name of this frequency record (will be displayed when graphed)
 
 usage:
 
-	python3 frequency.py -i "/Users/ben/Desktop/corpus/" -o "/Users/ben/Desktop/out.json" -k "cat,mat,hat" -t "Filtered Stemmed" -y "1800,1830,1870" -n "my favorite words"
+	python3 frequency.py -i "/Users/ben/Desktop/corpus/" -o "/Users/ben/Desktop/out.json" -k "cat,mat,hat" -t "Filtered Text Stemmed" -y "1800,1830,1870" -n "my favorite words"
 
 output:
 
@@ -88,7 +87,7 @@ output:
 
 
 ***
-###graph.py
+### graph.py
 
 purpose:
 
@@ -98,7 +97,7 @@ arguments:
 
 	-i : input directory. the script will graph the data associated with all files in this directory
 	-t : display total frequencies (instead of those from individual words)
-	-tite : graph title
+	-title : graph title
 	-bar_width : width of graph bars, default is 5
 
 usage:
@@ -111,7 +110,47 @@ output:
 
 
 ***
-###sub_corpus.py
+### hierarchical_tfidf.py
+
+purpose:
+
+	perform hierarchical clustering on tf-idf models of a corpus
+
+arguments:
+
+	-i: path to input corpus directory
+	-o: path to output directory where graphs will be stored
+	-k: list of keywords, separate each keyword by a comma
+	-t: text field to analyze (defaults to "Text")
+	-y: list of year periods
+
+usage:
+
+	python3 hierarchical_tfidf.py -i "/Users/ben/Desktop/corpus" -o "/Users/ben/Desktop/dendrograms/" -k "cat,mat,hat" -t "Filtered Text Stemmed" -y "1700,1800,1900"
+
+
+***
+### kmeans_tfidf.py
+
+purpose:
+
+	perform kmeans clustering on tf-idf models of a corpus
+
+arguments:
+
+	-i: path to input corpus directory
+	-o: path to output directory where graphs will be stored
+	-k: list of keywords, separate each keyword by a comma
+	-t: text field to analyze (defaults to "Text")
+	-y: list of year periods
+
+usage:
+
+	python3 kmeans_tfidf.py -i "/Users/ben/Desktop/corpus" -o "/Users/ben/Desktop/dendrograms/" -k "cat,mat,hat" -t "Filtered Text Stemmed" -y "1700,1800,1900"
+
+
+***
+### sub_corpus.py
 
 purpose:
 
@@ -123,17 +162,15 @@ arguments:
 	-o : path to output corpus directory
 	-k : list of keywords, separate each keyword by a comma
 	-l : number of words to extract per snippet
-	-t : text field to analyze (defaults to text)
-		- note : if you're running this script on an entire corpus, other text fields you might be interested in are the following -- 
-			Filtered, Stemmed, Filtered Stemmed
+	-t : text field to analyze (defaults to "Text")
 
 usage:
 
-	python3 sub_corpus.py -i "/Users/ben/Desktop/corpus/" -o "/Users/ben/Desktop/sub_corpus/" -k "cat,mat,hat" -l "30" -t "Filtered Stemmed"
+	python3 sub_corpus.py -i "/Users/ben/Desktop/corpus/" -o "/Users/ben/Desktop/sub_corpus/" -k "cat,mat,hat" -l "30" -t "Filtered Text Stemmed"
 
 
 ***
-###topic_model.py
+### topic_model.py
 
 purpose:
 
@@ -152,7 +189,7 @@ arguments:
 
 usage:
 
-	python3 topic_model.py -i "/Users/ben/Desktop/corpus/" -o "/Users/ben/Desktop/out.txt" -t "Filtered" -y "1800,1830,1880,1900" -l "danish" -num_topics "20" -passes "10" -stop "/Users/ben/Desktop/danish_stopwords.json"
+	python3 topic_model.py -i "/Users/ben/Desktop/corpus/" -o "/Users/ben/Desktop/out.txt" -t "Filtered Text Stemmed" -y "1800,1830,1880,1900" -l "danish" -num_topics "20" -passes "10" -stop "/Users/ben/Desktop/danish_stopwords.json"
 
 
 
