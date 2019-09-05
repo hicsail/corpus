@@ -140,6 +140,9 @@ class KMeansAuthorCluster(AuthorCluster):
     def generate_num_clusters(self):
         """
         Generate ideal number of clusters for K Means.
+
+        TODO: fill out empty entries in ret with an error message that can be
+        interpreted when it's passed to graphing functions.
         """
 
         ret = {}
@@ -147,8 +150,8 @@ class KMeansAuthorCluster(AuthorCluster):
         for y in self.nonzero_mat.keys():
             max_ks = int(len(self.nonzero_mat[y]) / 4)
 
-            # filter out empty entries
-            if max_ks > 0:
+            # filter entries that are too small for clustering
+            if max_ks > 4:
 
                 all_ks = [i for i in range(1, max_ks)]
                 errors = np.zeros(max_ks-1)
@@ -258,7 +261,7 @@ class HierarchicalAuthorCluster(AuthorCluster):
         Generate dendrogram plot and save to file.
         """
 
-        authors_np = np.array([np.array(i) for i in self.nonzero_authors[y]])
+        authors_np = [i for i in self.nonzero_authors[y]]
 
         figlen = len(self.nonzero_mat[y]) / 9
         fig = plt.figure(figsize=(15, figlen))
@@ -274,6 +277,8 @@ class HierarchicalAuthorCluster(AuthorCluster):
         Generate all dendrogram plots and save to directory.
         """
 
+        build_out(out_dir)
+
         if self.z is None:
             self.set_z()
 
@@ -281,4 +286,4 @@ class HierarchicalAuthorCluster(AuthorCluster):
 
             # filter out empty entries
             if len(self.nonzero_mat[y]) > 0:
-                self._generate_dendrograms(out_dir, self.z[y])
+                self._generate_dendrograms(out_dir, y)
