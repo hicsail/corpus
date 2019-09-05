@@ -18,6 +18,14 @@ if __name__ == '__main__':
                 with open(in_dir + "/" + json_doc, 'r', encoding='utf8') as in_file:
 
                     json_data = json.load(in_file)
+
+                    try:
+                        y = json_data["Year Published"]
+                        json_data["Date"] = y
+                        del json_data["Year Published"]
+                    except KeyError:
+                        pass
+
                     new_json = {"0": json_data}
 
                     with open(out_dir + "/" + json_doc, 'w', encoding='utf8') as out_file:
