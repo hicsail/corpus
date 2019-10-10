@@ -54,7 +54,7 @@ And each JSON file is expected to be structured as follows:
 
 ```
 
-Each JSON file is assumed to hold multiple voluems (`0, 1, ... <n>`) so as to save space when dealing
+Each JSON file is assumed to hold multiple volumes (`0, 1, ... <n>`) so as to save space when dealing
 with large corpora of small volumes (reddit comments, tweets, etc.).
 
 ### Data
