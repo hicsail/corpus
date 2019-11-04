@@ -13,7 +13,7 @@ def setup_parser():
     parser.add_argument("-t", action="store", help="text field to analyze", default="Text")
     parser.add_argument("-y", action="store", help="year ranges")
     parser.add_argument("-n", action="store", help="frequency record name")
-    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Date")
+    parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Year Published")
 
     return parser.parse_args()
 
