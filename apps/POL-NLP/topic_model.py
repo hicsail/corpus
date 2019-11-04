@@ -2,6 +2,10 @@ import argparse
 
 from corpus import corpus
 
+"""
+TODO: -num_words flag
+"""
+
 
 def setup_parser():
 
@@ -34,7 +38,7 @@ if __name__ == '__main__':
         [int(y) for y in args.y.split(",")],
         args.t,
         num_topics=int(args.num_topics),
-        passes=args.passes,
+        passes=int(args.passes),
         stop_words=args.stop,
         date_key=args.d
     )
