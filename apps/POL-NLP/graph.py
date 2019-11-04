@@ -3,6 +3,14 @@ import os
 
 from corpus.graph.frequencies import GraphFrequency
 
+"""
+TODO: line graphing
+TODO: look into mean, var, avg
+TODO: configurable numbers above bars
+TODO: black & white graphing
+TODO: .tiff output
+"""
+
 
 def setup_parser():
 

@@ -2,6 +2,10 @@ import argparse
 
 from corpus import corpus
 
+"""
+TODO: output text file
+"""
+
 
 def setup_parser():
 
