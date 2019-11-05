@@ -17,6 +17,7 @@ def setup_parser():
     parser.add_argument("-y", action="store", help="year ranges")
     parser.add_argument("-l", action="store", help="language", default="english")
     parser.add_argument("-num_topics", action="store", help="number of topics", default=10),
+    parser.add_argument("-num_words", action="store", help="number of words displayed per topic", default=10)
     parser.add_argument("-passes", action="store", help="number of passes", default=1)
     parser.add_argument("-stop", action="store", help="path to stopwords file", default=None)
     parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Year Published")
@@ -43,4 +44,4 @@ if __name__ == '__main__':
         date_key=args.d
     )
 
-    lda.write(args.o, args.num_topics)
+    lda.write(args.o, args.num_topics, args.num_words)
