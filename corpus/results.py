@@ -105,7 +105,7 @@ class FrequencyResults(Results):
                     else:
                         t.write(
                             "{0} of \"{1}\" for this period: {2}\n"
-                            .format(self.f_type, " ".join(k[0]), str(k[1]))
+                            .format(self.f_type, k[0], str(k[1]))
                         )
 
     def display(self, keys: [None, list]=None):
@@ -140,6 +140,22 @@ class FrequencyResults(Results):
                         "{0} of \"{1}\" for this period: {2}\n"
                         .format(self.f_type, " ".join(k), str(self.d[self.years[i]][k]))
                     )
+
+
+class RawFrequencyResults(Results):
+
+    def __init__(self, d: dict, n: dict, name: str):
+
+        super(RawFrequencyResults, self).__init__(d, n)
+
+        self.name = name
+        self.years = [y[0] for y in self.d.items()]
+
+    def debug_str(self):
+
+        print("RawFrequencyResults object: \n\t - name: {0}"
+              .format(self.name)
+              )
 
 
 class TopResults(Results):
@@ -345,7 +361,7 @@ class TopicResults(Results):
         return ", ".join(res)
 
     def write(self, out_path: str, num_topics: int = 10,
-              num_words: int=10, weights: bool = False):
+              num_words: int = 10, weights: bool = False):
         """
         Write contents of LdaResults object to file.
         """

@@ -67,7 +67,7 @@ class GraphFrequency:
                 f_types.add(corpus.f_type)
 
         if len(f_types) != 1:
-            print("Warning: mismatched frequency types across corpora.\n")
+            print("Warning: mismatched frequency types across corpora: \n\t {}.\n".format(f_types))
 
         return f_types.pop()
 
@@ -248,7 +248,7 @@ class GraphFrequency:
 
         if title is None:
             plt.title(self.title)
-            
+
         else:
             plt.title(title)
 

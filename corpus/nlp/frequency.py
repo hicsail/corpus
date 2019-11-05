@@ -1,5 +1,6 @@
 import tqdm
 import nltk
+import math
 
 from corpus.results import *
 
@@ -130,7 +131,7 @@ class Frequency:
                 frequency_lists[target] = {}
                 for kw in fdist:
                     frequency_lists[target]['FDIST'] = {}
-                    frequency_lists[target]['FDIST'][kw] = fdist[kw]
+                    frequency_lists[target]['FDIST'][kw] = [fdist[kw]]
                 frequency_lists[target]['NUM_DOCS'] = 1
                 frequency_lists[target]['TOTAL_WORDS'] = len(text)
 
@@ -139,9 +140,9 @@ class Frequency:
                 for kw in fdist:
 
                     try:
-                        frequency_lists[target]['FDIST'][kw] += fdist[kw]
+                        frequency_lists[target]['FDIST'][kw].append(fdist[kw])
                     except KeyError:
-                        frequency_lists[target]['FDIST'][kw] = fdist[kw]
+                        frequency_lists[target]['FDIST'][kw] = [fdist[kw]]
 
                 frequency_lists[target]['NUM_DOCS'] += 1
                 frequency_lists[target]['TOTAL_WORDS'] += len(text)
@@ -195,8 +196,8 @@ class Frequency:
                 total = 0
                 for k in keys:
                     try:
-                        total += freq[year]['FDIST'][k]
-                        results[year][k] = freq[year]['FDIST'][k] / freq[year]['TOTAL_WORDS']
+                        total += sum(freq[year]['FDIST'][k])
+                        results[year][k] = sum(freq[year]['FDIST'][k]) / freq[year]['TOTAL_WORDS']
                     except KeyError:
                         pass
 
@@ -219,18 +220,19 @@ class Frequency:
             if freq[year]['TOTAL_WORDS'] > 0:
 
                 total = 0
-
                 for k in keys:
+                    try:
+                        total += sum(freq[year]['FDIST'][k])
+                        results[year][k] = sum(freq[year]['FDIST'][k]) / freq[year]['NUM_DOCS']
+                    except KeyError:
+                        pass
 
-                    total += freq[year]['FDIST'][k]
-                    results[year][k] = freq[year]['FDIST'][k] / freq[year]['NUM_DOCS']
-                    num_docs[year] = freq[year]['NUM_DOCS']
-
+                num_docs[year] = freq[year]['NUM_DOCS']
                 results[year]['TOTAL'] = total / freq[year]['NUM_DOCS']
 
         return results, num_docs
 
-    def take_average_freq(self, keys):
+    def take_average_freq(self, keys, name):
         """
         Calculate average keyword frequency per document from frequency records.
         """
@@ -240,7 +242,43 @@ class Frequency:
 
         results, num_docs = self._take_average_freq(keys)
 
-        return FrequencyResults(results, num_docs, 'Average frequency', self.name)
+        return FrequencyResults(results, num_docs, 'Average frequency', name)
+
+    def _take_variance(self, keys):
+        """
+        Calculate variance of word frequency w/r/t average frequency per document.
+        """
+
+        averages, num_docs = self._take_average_freq(keys)
+        freq = self.frequency_record
+        results = num_dict(self.year_list, keys, 1)
+
+        for year in self.year_list[:-1]:
+
+            variances_all_keys = []
+
+            if freq[year]['TOTAL_WORDS'] > 0:
+
+                for k in keys:
+                    try:
+                        var = [math.pow((f - averages[year][k]), 2) for f in freq[year]['FDIST'][k]]
+                        variances_all_keys.extend(var)
+                        results[year][k] = sum(var) / len(var)
+                    except KeyError:
+                        pass
+
+            results[year]['TOTAL'] = sum(variances_all_keys) / len(variances_all_keys)
+
+        return results, num_docs
+
+    def take_variance(self, keys, name):
+
+        if self.frequency_record is None:
+            self.set_frequency_record(keys)
+
+        results, num_docs = self._take_variance(keys)
+
+        return FrequencyResults(results, num_docs, 'Variance', name)
 
     @staticmethod
     def _top_n(fdist, num: int, total_words: int):
