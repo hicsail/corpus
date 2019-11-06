@@ -14,7 +14,7 @@ def setup_parser():
     parser.add_argument("-y", action="store", help="year ranges")
     parser.add_argument("-n", action="store", help="frequency record name")
     parser.add_argument("-d", action="store", help="publication date key name for volumes", default="Year Published")
-    parser.add_argument("-txt", action="store", help="output text filepath")
+    parser.add_argument("-b", action="store_true", help="track binary word occurrence")
 
     return parser.parse_args()
 
@@ -28,21 +28,5 @@ if __name__ == '__main__':
         args.i
     )
 
-    freq = corp.frequency(
-        'freq',
-        [int(y) for y in args.y.split(",")],
-        args.t,
-        args.d
-    )
-
-    freq1 = freq.take_freq(args.k.split(","), args.n)
-    freq1.write_to_json("{}_global.json".format(args.o))
-    freq1.write("{}_global.txt".format(args.txt))
-
-    avg = freq.take_average_freq(args.k.split(","), args.n)
-    avg.write_to_json("{}_avg.json".format(args.o))
-    avg.write("{}_avg.txt".format(args.txt))
-
-    var = freq.take_variance(args.k.split(","), args.n)
-    var.write_to_json("{}_var.json".format(args.o))
-    var.write("{}_var.txt".format(args.txt))
+    rf = corp.raw_frequency(args.n, args.t, args.b)
+    rf.take_freq(args.k.split(","), args.n)

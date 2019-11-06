@@ -2,10 +2,6 @@ import argparse
 
 from corpus import corpus
 
-"""
-TODO: -num_words flag
-"""
-
 
 def setup_parser():
 

@@ -3,10 +3,6 @@ import sys
 
 from corpus import corpus
 
-"""
-TODO: specify time period
-"""
-
 
 def setup_parser():
 
