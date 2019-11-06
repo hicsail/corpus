@@ -98,7 +98,7 @@ class Corpus:
 
         return t
 
-    def raw_frequency(self, name: str,  key_list: list, text_type: str = 'Text', binary: bool = False):
+    def raw_frequency(self, name: str, text_type: str = 'Text', date_key: str = "Date", binary: bool = False):
         """
         Build raw frequency tables for a corpus. Returned object is used for
         difference in proportions testing.
@@ -108,11 +108,11 @@ class Corpus:
             name,
             self.in_dir,
             text_type,
-            key_list,
+            date_key,
             binary
         )
 
-        return rf.take_frequencies()
+        return rf
 
     def topic_model(self, name: str, year_list: list, text_type: str = 'Text', stop_words: [list, set, None] = None):
         """

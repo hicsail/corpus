@@ -155,6 +155,7 @@ class Frequency:
         """
 
         frequency_lists = num_dict(self.year_list)
+        frequency_lists["__N__"] = n
 
         print("Calculating frequency records.\n")
 
@@ -183,6 +184,8 @@ class Frequency:
         n = self.detect_n(keys)
 
         if self.frequency_record is None:
+            self.set_frequency_record(n)
+        elif self.frequency_record["__N__"] != n:
             self.set_frequency_record(n)
 
         num_docs = num_dict(self.year_list)
@@ -237,8 +240,12 @@ class Frequency:
         Calculate average keyword frequency per document from frequency records.
         """
 
+        n = self.detect_n(keys)
+
         if self.frequency_record is None:
-            self.set_frequency_record(keys)
+            self.set_frequency_record(n)
+        elif self.frequency_record["__N__"] != n:
+            self.set_frequency_record(n)
 
         results, num_docs = self._take_average_freq(keys)
 
@@ -273,8 +280,12 @@ class Frequency:
 
     def take_variance(self, keys, name):
 
+        n = self.detect_n(keys)
+
         if self.frequency_record is None:
-            self.set_frequency_record(keys)
+            self.set_frequency_record(n)
+        elif self.frequency_record["__N__"] != n:
+            self.set_frequency_record(n)
 
         results, num_docs = self._take_variance(keys)
 
@@ -297,14 +308,14 @@ class Frequency:
 
         return keys
 
-    def top_n(self, num: int = 10):
+    def top_n(self, n, num: int = 10):
         """
         Construct a dictionary that stores the top
-        <num> words per period across a corpus.
+        <num> n-grams per period across a corpus.
         """
 
         if self.frequency_record is None:
-            self.set_frequency_record()
+            self.set_frequency_record(n)
 
         num_docs = num_dict(self.year_list)
         n_words = list_dict(self.year_list)
