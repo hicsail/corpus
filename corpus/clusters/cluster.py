@@ -141,29 +141,37 @@ class KMeansAuthorCluster(AuthorCluster):
         """
         Generate ideal number of clusters for K Means.
 
-        TODO: fill out empty entries in ret with an error message that can be
-        interpreted when it's passed to graphing functions.
+        TODO: Right now, entries with too few datapoints are automatically
+        given num_clusters=3. This needs to be replaced with something more intelligent.
         """
 
         ret = {}
 
         for y in self.nonzero_mat.keys():
-            max_ks = int(len(self.nonzero_mat[y]) / 4)
 
-            # filter entries that are too small for clustering
-            if max_ks > 4:
+            if len(self.nonzero_mat[y]) > 0:
+                max_ks = int(len(self.nonzero_mat[y]) / 4)
 
-                all_ks = [i for i in range(1, max_ks)]
-                errors = np.zeros(max_ks-1)
+                # filter entries that are too small for clustering
+                if max_ks > 4:
 
-                for k in all_ks:
+                    all_ks = [i for i in range(1, max_ks)]
+                    errors = np.zeros(max_ks-1)
 
-                    temp_kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10)
-                    temp_kmeans.fit_predict(self.nonzero_mat[y])
-                    errors[k-1] = temp_kmeans.inertia_
+                    for k in all_ks:
 
-                kn = KneeLocator(all_ks, errors, curve='convex', direction='decreasing')
-                ret[y] = kn.knee
+                        temp_kmeans = KMeans(init='k-means++', n_clusters=k)
+                        temp_kmeans.fit_predict(self.nonzero_mat[y])
+                        errors[k-1] = temp_kmeans.inertia_
+
+                    try:
+                        kn = KneeLocator(all_ks, errors, curve='convex', direction='decreasing')
+                        ret[y] = kn.knee
+                    except ValueError:
+                        ret[y] = 3
+
+                else:
+                    ret[y] = 3
 
         return ret
 
