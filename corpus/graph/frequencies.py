@@ -196,6 +196,7 @@ class GraphFrequency:
             start = str(self.year_list[i])
             end = str(self.year_list[i + 1])
             labels.append("{0}-{1}".format(start, end))
+        labels.append("")
 
         return labels
 

@@ -244,8 +244,6 @@ class Frequency:
 
         if self.frequency_record is None:
             self.set_frequency_record(n)
-        elif self.frequency_record["__N__"] != n:
-            self.set_frequency_record(n)
 
         results, num_docs = self._take_average_freq(keys)
 
@@ -283,8 +281,6 @@ class Frequency:
         n = self.detect_n(keys)
 
         if self.frequency_record is None:
-            self.set_frequency_record(n)
-        elif self.frequency_record["__N__"] != n:
             self.set_frequency_record(n)
 
         results, num_docs = self._take_variance(keys)
